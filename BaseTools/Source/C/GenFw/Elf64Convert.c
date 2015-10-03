@@ -150,8 +150,8 @@ InitializeElf64 (
     Error (NULL, 0, 3000, "Unsupported", "ELF e_type not ET_EXEC or ET_DYN");
     return FALSE;
   }
-  if (!((mEhdr->e_machine == EM_X86_64) || (mEhdr->e_machine == EM_AARCH64))) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF e_machine not EM_X86_64 or EM_AARCH64");
+  if (!((mEhdr->e_machine == EM_X86_64) || (mEhdr->e_machine == EM_AARCH64) || (mEhdr->e_machine == EM_PPC64))) {
+    Error (NULL, 0, 3000, "Unsupported", "ELF e_machine not EM_X86_64, EM_AARCH64, EM_PPC64");
     return FALSE;
   }
   if (mEhdr->e_version != EV_CURRENT) {
@@ -284,6 +284,7 @@ ScanSections64 (
   case EM_X86_64:
   case EM_IA_64:
   case EM_AARCH64:
+  case EM_PPC64:
     mCoffOffset += sizeof (EFI_IMAGE_NT_HEADERS64);
   break;
   default:
@@ -482,6 +483,10 @@ ScanSections64 (
     break;
   case EM_AARCH64:
     NtHdr->Pe32Plus.FileHeader.Machine = EFI_IMAGE_MACHINE_AARCH64;
+    NtHdr->Pe32Plus.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+    break;
+  case EM_PPC64:
+    NtHdr->Pe32Plus.FileHeader.Machine = EFI_IMAGE_MACHINE_PPC64;
     NtHdr->Pe32Plus.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC;
     break;
   default:
@@ -796,6 +801,21 @@ WriteSections64 (
           default:
             Error (NULL, 0, 3000, "Invalid", "WriteSections64(): %s unsupported ELF EM_AARCH64 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
           }
+        } else if (mEhdr->e_machine == EM_PPC64) {
+          switch (ELF_R_TYPE(Rel->r_info)) {
+          case R_PPC64_ADDR64:
+            *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
+            break;
+
+          case R_PPC64_ADDR32:
+          case R_PPC64_ADDR24:
+          case R_PPC64_ADDR16:
+            Error (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s unsupported ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
+            break;
+
+          default:
+            Warning (NULL, 0, 3000, "Invalid", "WriteSections64(): %s skipped ELF EM_PPC64 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
+          }
         } else {
           Error (NULL, 0, 3000, "Invalid", "Not a supported machine type");
         }
@@ -894,6 +914,30 @@ WriteRelocations64 (
 
             default:
                 Error (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s unsupported ELF EM_AARCH64 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
+            }
+          } else if (mEhdr->e_machine == EM_PPC64) {
+            switch (ELF_R_TYPE(Rel->r_info)) {
+            case R_PPC64_ADDR64:
+              CoffAddFixup(
+                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                + (Rel->r_offset - SecShdr->sh_addr)),
+                EFI_IMAGE_REL_BASED_DIR64);
+              break;
+
+            case R_PPC64_ADDR32:
+              CoffAddFixup(
+                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                + (Rel->r_offset - SecShdr->sh_addr)),
+                EFI_IMAGE_REL_BASED_HIGHLOW);
+             break;
+
+            case R_PPC64_ADDR24:
+            case R_PPC64_ADDR16:
+              Error (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s unsupported ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
+              break;
+
+            default:
+              Warning (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s skipped ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
             }
           } else {
             Error (NULL, 0, 3000, "Not Supported", "This tool does not support relocations for ELF with e_machine %u (processor type).", (unsigned) mEhdr->e_machine);

@@ -502,17 +502,17 @@
   AArch64/CpuBreakpoint.S           | GCC
 
 [Sources.PPC64]
-  PPC64/InternalSwitchStack.c
-  PPC64/Unaligned.c
-  Math64.c
+#  PPC64/InternalSwitchStack.c
+   Unaligned.c
+   Math64.c
 
-  PPC64/MemoryFence.S             | GCC
-  PPC64/SwitchStack.S             | GCC
-  PPC64/EnableInterrupts.S        | GCC
-  PPC64/DisableInterrupts.S       | GCC
-  PPC64/GetInterruptsState.S      | GCC
-  PPC64/SetJumpLongJump.S         | GCC
-  PPC64/CpuBreakpoint.S           | GCC
+#  PPC64/MemoryFence.S             | GCC
+#  PPC64/SwitchStack.S             | GCC
+#  PPC64/EnableInterrupts.S        | GCC
+#  PPC64/DisableInterrupts.S       | GCC
+#  PPC64/GetInterruptsState.S      | GCC
+#  PPC64/SetJumpLongJump.S         | GCC
+#  PPC64/CpuBreakpoint.S           | GCC
 
 [Packages]
   MdePkg/MdePkg.dec

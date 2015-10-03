@@ -1,5 +1,5 @@
 #/** @file
-# PowerPC 64-bit LE processor package.
+# PowerPC 64-bit LE on PowerNV/OPAL platforms.
 #
 # Copyright (c) 2015, Andrei Warkentin <andrey.warkentin@gmail.com>
 #

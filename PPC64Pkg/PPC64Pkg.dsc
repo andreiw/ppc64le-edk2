@@ -1,5 +1,5 @@
 #/** @file
-# PowerPC 64-bit LE processor package.
+# PowerPC 64-bit LE on PowerNV/OPAL platforms.
 #
 # Copyright (c) 2015, Andrei Warkentin <andrey.warkentin@gmail.com>
 #
@@ -85,15 +85,16 @@
   DxeCoreEntryPoint|MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
-   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+  DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   PerformanceLib|MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
   
 [Components.common]
   #
   # DXE
   #
-  MdeModulePkg/Core/Dxe/DxeMain.inf {
-    <LibraryClasses>
-      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-      NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
-  }
+  #MdeModulePkg/Core/Dxe/DxeMain.inf {
+  #  <LibraryClasses>
+  #    PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  #    NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+  #}
+  PPC64Pkg/Application/Test/Test.inf

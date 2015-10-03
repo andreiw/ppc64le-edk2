@@ -897,6 +897,11 @@ typedef struct {
 #define	R_PPC_SECTOFF_HI	35
 #define	R_PPC_SECTOFF_HA	36
 
+#define	R_PPC64_ADDR64		38
+#define	R_PPC64_ADDR32		R_PPC_ADDR32
+#define	R_PPC64_ADDR24		R_PPC_ADDR24
+#define	R_PPC64_ADDR16		R_PPC_ADDR16
+
 /*
  * TLS relocations
  */
