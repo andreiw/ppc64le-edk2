@@ -38,7 +38,7 @@ def GenerateHelpText(Text, Lang):
 #                      ALWAYS_CONSUMED | SOMETIMES_CONSUMED | ALWAYS_PRODUCED | SOMETIMES_PRODUCED | TO_START | BY_START | PRIVATE
 # @var FeatureFlag:    To store value for FeatureFlag
 # @var SupArchList:    To store value for SupArchList, selection scope is in below list
-#                      EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64
+#                      EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64 | PPC64
 # @var HelpText:       To store value for HelpText
 #
 class CommonClass(object):
@@ -401,7 +401,7 @@ class PcdClass(CommonClass):
 # @var TagName:                  To store value for TagName
 # @var ToolCode:                 To store value for ToolCode
 # @var SupArchList:              To store value for SupArchList, selection scope is in below list
-#                                EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64
+#                                EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64 | PPC64
 #
 class BuildOptionClass(IncludeStatementClass):
     def __init__(self, ToolChainFamily = '', ToolChain = '', Option = ''):

@@ -178,6 +178,16 @@ typedef struct {
 
 #endif  // defined (MDE_CPU_AARCH64)
 
+#if defined (MDE_CPU_PPC64)
+typedef struct {
+  // FIXME PPC64
+  UINT64    foo;
+} BASE_LIBRARY_JUMP_BUFFER;
+
+#define BASE_LIBRARY_JUMP_BUFFER_ALIGNMENT 8
+
+#endif  // defined (MDE_CPU_PPC64)
+
 
 //
 // String Services

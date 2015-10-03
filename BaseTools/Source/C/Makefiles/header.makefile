@@ -43,6 +43,10 @@ ifeq ($(ARCH), AARCH64)
 ARCH_INCLUDE = -I $(MAKEROOT)/Include/AArch64/
 endif
 
+ifeq ($(ARCH), PPC64)
+ARCH_INCLUDE = -I $(MAKEROOT)/Include/PPC64/
+endif
+
 INCLUDE = $(TOOL_INCLUDE) -I $(MAKEROOT) -I $(MAKEROOT)/Include/Common -I $(MAKEROOT)/Include/ -I $(MAKEROOT)/Include/IndustryStandard -I $(MAKEROOT)/Common/ -I .. -I . $(ARCH_INCLUDE) 
 CPPFLAGS = $(INCLUDE)
 ifeq ($(DARWIN),Darwin)

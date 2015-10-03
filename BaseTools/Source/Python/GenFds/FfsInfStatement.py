@@ -543,6 +543,11 @@ class FfsInfStatement(FfsInfStatementClassObject):
             if InfFileKey in (PlatformDataBase.Modules):
                 DscArchList.append ('AARCH64')
 
+        PlatformDataBase = GenFdsGlobalVariable.WorkSpace.BuildObject[GenFdsGlobalVariable.ActivePlatform, 'PPC64', GenFdsGlobalVariable.TargetName, GenFdsGlobalVariable.ToolChainTag]
+        if PlatformDataBase != None:
+            if InfFileKey in (PlatformDataBase.Modules):
+                DscArchList.append ('PPC64')
+
         return DscArchList
 
     ## GetCurrentArch() method

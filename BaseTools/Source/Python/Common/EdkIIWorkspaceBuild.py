@@ -405,7 +405,7 @@ class ItemBuild(object):
 #
 # @var WorkspaceDir:      To store value for WorkspaceDir
 # @var SupArchList:       To store value for SupArchList, selection scope is in below list
-#                         EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64
+#                         EBC | IA32 | X64 | IPF | ARM | PPC | AARCH64 | PPC64
 # @var BuildTarget:       To store value for WorkspaceDir, selection scope is in below list
 #                         RELEASE | DEBUG
 # @var SkuId:             To store value for SkuId

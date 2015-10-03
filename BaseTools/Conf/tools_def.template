@@ -3837,6 +3837,7 @@ DEFINE GCC_X64_RC_FLAGS            = -I binary -O elf64-x86-64        -B i386   
 DEFINE GCC_IPF_RC_FLAGS            = -I binary -O elf64-ia64-little   -B ia64    --rename-section .data=.hii
 DEFINE GCC_ARM_RC_FLAGS            = -I binary -O elf32-littlearm     -B arm     --rename-section .data=.hii
 DEFINE GCC_AARCH64_RC_FLAGS        = -I binary -O elf64-littleaarch64 -B aarch64 --rename-section .data=.hii
+DEFINE GCC_PPC64_RC_FLAGS        = -I binary -O elf64-powerpcle -B powerpc --rename-section .data=.hii
 
 DEFINE GCC44_ALL_CC_FLAGS            = -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -c -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
 DEFINE GCC44_IA32_CC_FLAGS           = DEF(GCC44_ALL_CC_FLAGS) -m32 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables
@@ -3933,6 +3934,12 @@ DEFINE GCC49_AARCH64_DLINK_FLAGS     = DEF(GCC48_AARCH64_DLINK_FLAGS)
 DEFINE GCC49_AARCH64_DLINK2_FLAGS    = DEF(GCC48_AARCH64_DLINK2_FLAGS)
 DEFINE GCC49_ARM_ASLDLINK_FLAGS      = DEF(GCC48_ARM_ASLDLINK_FLAGS)
 DEFINE GCC49_AARCH64_ASLDLINK_FLAGS  = DEF(GCC48_AARCH64_ASLDLINK_FLAGS)
+
+DEFINE GCC49_PPC64_ASM_FLAGS         = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS) -mlittle-endian
+DEFINE GCC49_PPC64_CC_FLAGS          = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -save-temps -fverbose-asm -fsigned-char -ffunction-sections -fdata-section -fomit-frame-pointer -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mcmodel=large -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -mpowerpc64 -mcpu=power8 -mtune=power8 -mabi-elf2 -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
+DEFINE GCC49_PPC64_DLINK_FLAGS       = --emit-relocs -nostdlib --gc-sections -u $(IMAGE_ENTRY_POINT) -e $(IMAGE_ENTRY_POINT) -Map $(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x1000
+DEFINE GCC49_PPC64_DLINK2_FLAGS      = DEF(GCC_DLINK2_FLAGS_COMMON) --defsym=PECOFF_HEADER_SIZE=0x228
+DEFINE GCC49_PPC64_ASLDLINK_FLAGS    = DEF(GCC49_PPC64_DLINK_FLAGS) --entry ReferenceAcpiTable -u $(IMAGE_ENTRY_POINT)
 
 ####################################################################################
 #
@@ -4643,6 +4650,33 @@ RELEASE_GCC49_ARM_CC_FLAGS       = DEF(GCC49_ARM_CC_FLAGS) -Wno-unused-but-set-v
 
   DEBUG_GCC49_AARCH64_CC_FLAGS   = DEF(GCC49_AARCH64_CC_FLAGS) -O0
 RELEASE_GCC49_AARCH64_CC_FLAGS   = DEF(GCC49_AARCH64_CC_FLAGS) -Wno-unused-but-set-variable
+
+##################
+# GCC49 PPC64 definitions
+##################
+*_GCC49_PPC64_CC_PATH          = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_SLINK_PATH       = ENV(GCC49_PPC64_PREFIX)ar
+*_GCC49_PPC64_DLINK_PATH       = ENV(GCC49_PPC64_PREFIX)ld
+*_GCC49_PPC64_ASLDLINK_PATH    = ENV(GCC49_PPC64_PREFIX)ld
+*_GCC49_PPC64_ASM_PATH         = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_PP_PATH          = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_VFRPP_PATH       = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_ASLCC_PATH       = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_ASLPP_PATH       = ENV(GCC49_PPC64_PREFIX)gcc
+*_GCC49_PPC64_RC_PATH          = ENV(GCC49_PPC64_PREFIX)objcopy
+
+*_GCC49_PPC64_ASLCC_FLAGS      = DEF(GCC_ASLCC_FLAGS)
+*_GCC49_PPC64_ASLDLINK_FLAGS   = DEF(GCC49_PPC64_ASLDLINK_FLAGS)
+*_GCC49_PPC64_ASM_FLAGS        = DEF(GCC49_PPC64_ASM_FLAGS)
+*_GCC49_PPC64_DLINK_FLAGS      = DEF(GCC49_PPC64_DLINK_FLAGS)
+*_GCC49_PPC64_DLINK2_FLAGS     = DEF(GCC49_PPC64_DLINK2_FLAGS)
+*_GCC49_PPC64_PLATFORM_FLAGS   =
+*_GCC49_PPC64_PP_FLAGS         = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_PP_FLAGS)
+*_GCC49_PPC64_RC_FLAGS         = DEF(GCC_PPC64_RC_FLAGS)
+*_GCC49_PPC64_VFRPP_FLAGS      = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_VFRPP_FLAGS)
+
+  DEBUG_GCC49_PPC64_CC_FLAGS   = DEF(GCC49_PPC64_CC_FLAGS) -O0
+RELEASE_GCC49_PPC64_CC_FLAGS   = DEF(GCC49_PPC64_CC_FLAGS) -Wno-unused-but-set-variable
 
 ####################################################################################
 #
