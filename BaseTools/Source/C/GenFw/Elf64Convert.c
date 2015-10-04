@@ -671,7 +671,10 @@ WriteSections64 (
         if (Sym->st_shndx == SHN_UNDEF
             || Sym->st_shndx == SHN_ABS
             || Sym->st_shndx > mEhdr->e_shnum) {
-          Error (NULL, 0, 3000, "Invalid", "%s bad symbol definition.", mInImageName);
+          if (mEhdr->e_machine != EM_PPC64 ||
+              ELF_R_TYPE(Rel->r_info) != R_PPC64_TOC) {
+            Error (NULL, 0, 3000, "Invalid", "%s bad symbol definition.", mInImageName);
+          }
         }
         SymShdr = GetShdrByIndex(Sym->st_shndx);
 
@@ -804,6 +807,7 @@ WriteSections64 (
         } else if (mEhdr->e_machine == EM_PPC64) {
           switch (ELF_R_TYPE(Rel->r_info)) {
           case R_PPC64_ADDR64:
+          case R_PPC64_TOC:
             *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
             break;
 
@@ -918,6 +922,7 @@ WriteRelocations64 (
           } else if (mEhdr->e_machine == EM_PPC64) {
             switch (ELF_R_TYPE(Rel->r_info)) {
             case R_PPC64_ADDR64:
+            case R_PPC64_TOC:
               CoffAddFixup(
                 (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
                 + (Rel->r_offset - SecShdr->sh_addr)),

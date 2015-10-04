@@ -26,6 +26,7 @@
   OUTPUT_DIRECTORY               = Build/PPC64
   SUPPORTED_ARCHITECTURES        = PPC64
   BUILD_TARGETS                  = DEBUG|RELEASE
+  FLASH_DEFINITION               = PPC64Pkg/PPC64Pkg.fdf
   SKUID_IDENTIFIER               = DEFAULT
 
 [BuildOptions]
@@ -87,8 +88,15 @@
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   PerformanceLib|MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
-  
+
+[LibraryClasses.common.SEC]
+
 [Components.common]
+  #
+  # IPL ("SEC").
+  #
+  PPC64Pkg/Ipl/Ipl.inf
+
   #
   # DXE
   #

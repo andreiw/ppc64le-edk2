@@ -1,0 +1,49 @@
+#/** @file
+#
+# PowerPC 64-bit LE on PowerNV/OPAL platforms.
+#
+# Copyright (c) 2015, Andrei Warkentin <andrey.warkentin@gmail.com>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Ipl
+  FILE_GUID                      = d959e387-7b91-452c-90e0-a1dbac90dda5
+  MODULE_TYPE                    = SEC
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  Ipl.c
+
+[Sources.PPC64]
+  PPC64/ModuleEntryPoint.S
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  PPC64Pkg/PPC64Pkg.dec
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+
+[LibraryClasses]
+
+[Ppis]
+
+[Guids]
+
+[FeaturePcd]
+
+[Pcd]
+
+[FixedPcd]
+
+[Pcd]

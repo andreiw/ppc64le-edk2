@@ -34,6 +34,7 @@
 [LibraryClasses.common]
 
 [Guids.common]
+  gPPC64TokenSpaceGuid       = { 0xAA11DDFE, 0x820F, 0x4968, { 0xBB, 0xA6, 0xF7, 0x6A, 0xFE, 0x30, 0x25, 0x96 } }
 
 [Ppis]
 
@@ -43,7 +44,12 @@
 
 [PcdsFixedAtBuild.common]
 
+  gPPC64TokenSpaceGuid.PcdFdSize|0|UINT32|0x0000002C
+  gPPC64TokenSpaceGuid.PcdFvSize|0|UINT32|0x0000002E
+
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
+  gPPC64TokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x0000002B
+  gPPC64TokenSpaceGuid.PcdFvBaseAddress|0|UINT64|0x0000002D
 
 [PcdsFixedAtBuild.PPC64]
 
