@@ -114,14 +114,21 @@ typedef INT64   INTN;
   ///
   #define ASM_GLOBAL .globl
 
-  #define INTERWORK_FUNC(func__)   .type ASM_PFX(func__), %function
-
-  #define GCC_ASM_EXPORT(func__)  \
-             .global  _CONCATENATE (__USER_LABEL_PREFIX__, func__)    ;\
-             .type ASM_PFX(func__), %function  
-
-  #define GCC_ASM_IMPORT(func__)  \
-             .extern  _CONCATENATE (__USER_LABEL_PREFIX__, func__)
+#define ASM_LABEL(a) _CONCATENATE(__USER_LABEL_PREFIX__, a)
+#define ASM_DOTNAME(a) _CONCATENATE(.,ASM_LABEL(a))
+#define ASM_FUNC(name)                  \
+  .section .text;                       \
+  .align 2 ;                            \
+  .globl ASM_LABEL(name);               \
+  .globl ASM_DOTNAME(name);             \
+  .section ".opd","aw";                 \
+ASM_LABEL(name):                        \
+  .quad ASM_DOTNAME(name);              \
+  .quad .TOC.@tocbase;                  \
+  .quad 0;                              \
+  .previous;                            \
+  .type ASM_LABEL(name),@function;      \
+ASM_DOTNAME(name):
 #endif
 
 /**

@@ -33,13 +33,15 @@
   RELEASE_*_*_CC_FLAGS  = -DMDEPKG_NDEBUG
 
 [LibraryClasses.common]
+  OpalLib|PPC64Pkg/Library/OpalLib/OpalLib.inf
+  SerialPortLib|PPC64Pkg/Library/OpalSerialPortLib/OpalSerialPortLib.inf
+
   CacheMaintenanceLib|PPC64Pkg/Library/PPC64CacheMaintenanceLib/PPC64CacheMaintenanceLib.inf
   CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
 
   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
   DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
   DebugAgentTimerLib|EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
-
 
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
@@ -67,7 +69,6 @@
 
   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
   PerformanceLib|MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf
-  SerialPortLib|MdePkg/Library/BaseSerialPortLibNull/BaseSerialPortLibNull.inf
 
   FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 
@@ -90,6 +91,9 @@
   PerformanceLib|MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
 
 [LibraryClasses.common.SEC]
+
+[PcdsFixedAtBuild.common]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"$(FIRMWARE_VER)"
 
 [Components.common]
   #

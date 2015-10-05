@@ -1,0 +1,36 @@
+#/** @file
+#
+# PowerPC 64-bit LE on PowerNV/OPAL platforms.
+#
+# Copyright (c) 2015, Andrei Warkentin <andrey.warkentin@gmail.com>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OpalLib
+  FILE_GUID                      = 82da1b44-d2d6-4a7d-bbf0-a0cb67964034
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OpalLib
+
+[Sources.PPC64]
+  PPC64/Opal.S
+
+[Packages]
+  PPC64Pkg/PPC64Pkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+
+[Pcd]
+

@@ -3826,8 +3826,8 @@ DEFINE GCC_IA32_X64_DLINK_FLAGS    = DEF(GCC_IA32_X64_DLINK_COMMON) --entry _$(I
 DEFINE GCC_IPF_DLINK_FLAGS         = -nostdlib -O2 --gc-sections --dll -static --entry $(IMAGE_ENTRY_POINT) --undefined $(IMAGE_ENTRY_POINT) -Map $(DEST_DIR_DEBUG)/$(BASE_NAME).map
 DEFINE GCC_IPF_OBJCOPY_FLAGS       = -I elf64-ia64-little -O efi-bsdrv-ia64
 DEFINE GCC_IPF_SYMRENAME_FLAGS     = --redefine-sym memcpy=CopyMem
-DEFINE GCC_ASM_FLAGS               = -c -x assembler -imacros $(DEST_DIR_DEBUG)/AutoGen.h
-DEFINE GCC_PP_FLAGS                = -E -x assembler-with-cpp -include $(DEST_DIR_DEBUG)/AutoGen.h
+DEFINE GCC_ASM_FLAGS               = -c -x assembler -imacros $(DEST_DIR_DEBUG)/AutoGen.h -D__ASSEMBLY__
+DEFINE GCC_PP_FLAGS                = -E -x assembler-with-cpp -include $(DEST_DIR_DEBUG)/AutoGen.h -D__ASSEMBLY__
 DEFINE GCC_VFRPP_FLAGS             = -x c -E -P -DVFRCOMPILE --include $(DEST_DIR_DEBUG)/$(MODULE_NAME)StrDefs.h
 DEFINE GCC_ASLPP_FLAGS             = -x c -E -P
 DEFINE GCC_ASLCC_FLAGS             = -x c
@@ -3935,8 +3935,8 @@ DEFINE GCC49_AARCH64_DLINK2_FLAGS    = DEF(GCC48_AARCH64_DLINK2_FLAGS)
 DEFINE GCC49_ARM_ASLDLINK_FLAGS      = DEF(GCC48_ARM_ASLDLINK_FLAGS)
 DEFINE GCC49_AARCH64_ASLDLINK_FLAGS  = DEF(GCC48_AARCH64_ASLDLINK_FLAGS)
 
-DEFINE GCC49_PPC64_ASM_FLAGS         = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS) -mlittle-endian
-DEFINE GCC49_PPC64_CC_FLAGS          = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -save-temps -fverbose-asm -fsigned-char -ffunction-sections -fdata-section -fomit-frame-pointer -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mcmodel=large -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -mpowerpc64 -mcpu=power8 -mtune=power8 -mabi-elf2 -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
+DEFINE GCC49_PPC64_ASM_FLAGS         = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS) -mlittle-endian -mcmodel=large
+DEFINE GCC49_PPC64_CC_FLAGS          = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -save-temps -fverbose-asm -fsigned-char -mcmodel=large -fomit-frame-pointer  -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -mpowerpc64 -mcpu=power8 -mtune=power8 -mabi=elfv1 -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
 DEFINE GCC49_PPC64_DLINK_FLAGS       = --emit-relocs -nostdlib --gc-sections -u $(IMAGE_ENTRY_POINT) -e $(IMAGE_ENTRY_POINT) -Map $(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x1000
 DEFINE GCC49_PPC64_DLINK2_FLAGS      = DEF(GCC_DLINK2_FLAGS_COMMON) --defsym=PECOFF_HEADER_SIZE=0x228
 DEFINE GCC49_PPC64_ASLDLINK_FLAGS    = DEF(GCC49_PPC64_DLINK_FLAGS) --entry ReferenceAcpiTable -u $(IMAGE_ENTRY_POINT)
@@ -4664,6 +4664,7 @@ RELEASE_GCC49_AARCH64_CC_FLAGS   = DEF(GCC49_AARCH64_CC_FLAGS) -Wno-unused-but-s
 *_GCC49_PPC64_ASLCC_PATH       = ENV(GCC49_PPC64_PREFIX)gcc
 *_GCC49_PPC64_ASLPP_PATH       = ENV(GCC49_PPC64_PREFIX)gcc
 *_GCC49_PPC64_RC_PATH          = ENV(GCC49_PPC64_PREFIX)objcopy
+*_GCC49_PPC64_OBJCOPY_PATH     = ENV(GCC49_PPC64_PREFIX)objcopy
 
 *_GCC49_PPC64_ASLCC_FLAGS      = DEF(GCC_ASLCC_FLAGS)
 *_GCC49_PPC64_ASLDLINK_FLAGS   = DEF(GCC49_PPC64_ASLDLINK_FLAGS)
@@ -4674,6 +4675,7 @@ RELEASE_GCC49_AARCH64_CC_FLAGS   = DEF(GCC49_AARCH64_CC_FLAGS) -Wno-unused-but-s
 *_GCC49_PPC64_PP_FLAGS         = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_PP_FLAGS)
 *_GCC49_PPC64_RC_FLAGS         = DEF(GCC_PPC64_RC_FLAGS)
 *_GCC49_PPC64_VFRPP_FLAGS      = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_VFRPP_FLAGS)
+*_GCC49_PPC64_OBJCOPY_FLAGS    =
 
   DEBUG_GCC49_PPC64_CC_FLAGS   = DEF(GCC49_PPC64_CC_FLAGS) -O0
 RELEASE_GCC49_PPC64_CC_FLAGS   = DEF(GCC49_PPC64_CC_FLAGS) -Wno-unused-but-set-variable

@@ -28,7 +28,6 @@ SECTIONS {
   .text : ALIGN(CONSTANT(COMMONPAGESIZE)) {
     *(.text .text.* .stub .gnu.linkonce.t.*)
     *(.rodata .rodata.* .gnu.linkonce.r.*)
-    *(.got .got.*)
 
     /*
      * The contents of AutoGen.c files are constant from the POV of the program,
@@ -45,8 +44,15 @@ SECTIONS {
    * this binary.
    */
   .data ALIGN(ALIGNOF(.text)) : ALIGN(CONSTANT(COMMONPAGESIZE)) {
-    *(.data .data.* .gnu.linkonce.d.*)
-    *(.bss .bss.* *COM*)
+        __toc_start = . + 0x8000;
+      *(.got)
+      *(.toc)
+      *(.data .data.* .gnu.linkonce.d.*)
+      *(.branch_lt)
+      *(.toc1)
+      . = ALIGN(0x10);
+      *(.opd)
+      *(.bss .bss.* *COM*)
   }
 
   .eh_frame ALIGN(CONSTANT(COMMONPAGESIZE)) : {

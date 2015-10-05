@@ -43,13 +43,18 @@
 [PcdsFeatureFlag.common]
 
 [PcdsFixedAtBuild.common]
+  gPPC64TokenSpaceGuid.PcdFdSize|0|UINT32|0x00001001
+  gPPC64TokenSpaceGuid.PcdFvSize|0|UINT32|0x00001002
+  gPPC64TokenSpaceGuid.PcdCoreCount|1|UINT32|0x00001003
+  gPPC64TokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x10000|UINT32|0x00001004
 
-  gPPC64TokenSpaceGuid.PcdFdSize|0|UINT32|0x0000002C
-  gPPC64TokenSpaceGuid.PcdFvSize|0|UINT32|0x0000002E
+[PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
+  gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0|UINT64|0x00002001
+  gPPC64TokenSpaceGuid.PcdSystemMemorySize|0|UINT64|0x00002002
 
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
-  gPPC64TokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x0000002B
-  gPPC64TokenSpaceGuid.PcdFvBaseAddress|0|UINT64|0x0000002D
+  gPPC64TokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x00003001
+  gPPC64TokenSpaceGuid.PcdFvBaseAddress|0|UINT64|0x00003002
 
 [PcdsFixedAtBuild.PPC64]
 

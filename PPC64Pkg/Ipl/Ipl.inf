@@ -35,7 +35,10 @@
   IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
 
 [LibraryClasses]
-
+  OpalLib
+  BaseLib
+  PrintLib
+  SerialPortLib
 [Ppis]
 
 [Guids]
@@ -45,5 +48,9 @@
 [Pcd]
 
 [FixedPcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
+  gPPC64TokenSpaceGuid.PcdFdBaseAddress
+  gPPC64TokenSpaceGuid.PcdFdSize
+  gPPC64TokenSpaceGuid.PcdCPUCorePrimaryStackSize
 
 [Pcd]

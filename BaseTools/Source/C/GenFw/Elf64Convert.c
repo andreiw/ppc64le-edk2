@@ -391,6 +391,17 @@ ScanSections64 (
         }
       }
 
+      /*
+       * PPC ABIv1 entry is actually a function
+       * descriptor, hence it is in data.
+       */
+      if (mEhdr->e_machine == EM_PPC64) {
+        if ((mEhdr->e_entry >= shdr->sh_addr) &&
+            (mEhdr->e_entry < shdr->sh_addr + shdr->sh_size)) {
+          CoffEntry = (UINT32) (mCoffOffset + mEhdr->e_entry - shdr->sh_addr);
+        }
+      }
+
       //
       // Set mDataOffset with the offset of the first '.data' section
       //
@@ -811,14 +822,22 @@ WriteSections64 (
             *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
             break;
 
+          case R_PPC64_UADDR32:
           case R_PPC64_ADDR32:
           case R_PPC64_ADDR24:
+          case R_PPC64_UADDR16:
           case R_PPC64_ADDR16:
+          case R_PPC64_ADDR16_LO:
+          case R_PPC64_ADDR16_HI:
+          case R_PPC64_ADDR16_HA:
+          case R_PPC64_ADDR14:
+          case R_PPC64_ADDR14_BRTAKEN:
+          case R_PPC64_ADDR14_BRNTAKEN:
             Error (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s unsupported ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
             break;
 
           default:
-            Warning (NULL, 0, 3000, "Invalid", "WriteSections64(): %s skipped ELF EM_PPC64 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
+            VerboseMsg ("WriteSections64(): %s skipped ELF EM_PPC64 relocation 0x%x.", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info));
           }
         } else {
           Error (NULL, 0, 3000, "Invalid", "Not a supported machine type");
@@ -929,20 +948,22 @@ WriteRelocations64 (
                 EFI_IMAGE_REL_BASED_DIR64);
               break;
 
+            case R_PPC64_UADDR32:
             case R_PPC64_ADDR32:
-              CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
-                + (Rel->r_offset - SecShdr->sh_addr)),
-                EFI_IMAGE_REL_BASED_HIGHLOW);
-             break;
-
             case R_PPC64_ADDR24:
+            case R_PPC64_UADDR16:
             case R_PPC64_ADDR16:
+            case R_PPC64_ADDR16_LO:
+            case R_PPC64_ADDR16_HI:
+            case R_PPC64_ADDR16_HA:
+            case R_PPC64_ADDR14:
+            case R_PPC64_ADDR14_BRTAKEN:
+            case R_PPC64_ADDR14_BRNTAKEN:
               Error (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s unsupported ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
               break;
 
             default:
-              Warning (NULL, 0, 3000, "Invalid", "WriteRelocations64(): %s skipped ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
+              VerboseMsg ("WriteRelocations64(): %s skipped ELF EM_PPC64 relocation 0x%x (%u).", mInImageName, (unsigned) ELF_R_TYPE(Rel->r_info), (unsigned) ELF_R_TYPE(Rel->r_info));
             }
           } else {
             Error (NULL, 0, 3000, "Not Supported", "This tool does not support relocations for ELF with e_machine %u (processor type).", (unsigned) mEhdr->e_machine);
