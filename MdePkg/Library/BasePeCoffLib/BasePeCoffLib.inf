@@ -40,7 +40,7 @@
   BasePeCoffLibInternals.h
   BasePeCoff.c
 
-[Sources.IA32, Sources.X64, Sources.EBC, Sources.AARCH64]
+[Sources.IA32, Sources.X64, Sources.EBC, Sources.AARCH64, Sources.PPC64]
   PeCoffLoaderEx.c
 
 [Sources.IPF]

@@ -502,7 +502,8 @@
   AArch64/CpuBreakpoint.S           | GCC
 
 [Sources.PPC64]
-#  PPC64/InternalSwitchStack.c
+   PPC64/SwitchStack.S
+   PPC64/CpuBreakpoint.S
    Unaligned.c
    Math64.c
 

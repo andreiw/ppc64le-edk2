@@ -31,13 +31,13 @@ PcrGet(void)
 	return pcr;
 }
 #else
-#define PCR_Toc        0
-#define PCR_OPALBase   8
-#define PCR_OPALEntry 16
-#define PCR_SLBSize   24
-#define PCR_UnrecSP   32
-#define PCR_KernSP    40
-#define PCR_TBFreq    48
+#define PCR_Toc                      0
+#define PCR_OPALBase                 8
+#define PCR_OPALEntry               16
+#define PCR_SLBSize                 24
+#define PCR_UnrecSP                 32
+#define PCR_KernSP                  40
+#define PCR_TBFreq                  48
 #define PCR_R(name, reg) (PCR_ ## name)(reg)
 #define PCR(name) PCR_R(name, r13)
 

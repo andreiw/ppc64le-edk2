@@ -38,19 +38,34 @@
   OpalLib
   BaseLib
   PrintLib
+  FdtLib
   SerialPortLib
+  HobLib
+  PeCoffLib
+  PeCoffGetEntryPointLib
+  ExtractGuidedSectionLib
+  LzmaDecompressLib
+  MemoryAllocationLib
 [Ppis]
 
 [Guids]
+  gFdtHobGuid
 
 [FeaturePcd]
 
 [Pcd]
+  gPPC64TokenSpaceGuid.PcdSystemMemorySize
 
 [FixedPcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
   gPPC64TokenSpaceGuid.PcdFdBaseAddress
   gPPC64TokenSpaceGuid.PcdFdSize
+  gPPC64TokenSpaceGuid.PcdFvBaseAddress
+  gPPC64TokenSpaceGuid.PcdFvSize
   gPPC64TokenSpaceGuid.PcdCPUCorePrimaryStackSize
+  gPPC64TokenSpaceGuid.PcdSystemMemoryBase
+  gPPC64TokenSpaceGuid.PcdPHITRegionSize
 
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize
 [Pcd]

@@ -45,7 +45,8 @@
 
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
-  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+  DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
+  DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -58,6 +59,7 @@
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
   PeCoffGetEntryPointLib|MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
+  UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
   
   NetLib|MdeModulePkg/Library/DxeNetLib/DxeNetLib.inf
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
@@ -91,9 +93,57 @@
   PerformanceLib|MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
 
 [LibraryClasses.common.SEC]
+   PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
+   HobLib|EmbeddedPkg/Library/PrePiHobLib/PrePiHobLib.inf
+   PrePiHobListPointerLib|PPC64Pkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
+   MemoryAllocationLib|EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
+   ExtractGuidedSectionLib|EmbeddedPkg/Library/PrePiExtractGuidedSectionLib/PrePiExtractGuidedSectionLib.inf
+   LzmaDecompressLib|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
+
 
 [PcdsFixedAtBuild.common]
+  gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0x0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"$(FIRMWARE_VER)"
+
+  # DEBUG_ASSERT_ENABLED       0x01
+  # DEBUG_PRINT_ENABLED        0x02
+  # DEBUG_CODE_ENABLED         0x04
+  # CLEAR_MEMORY_ENABLED       0x08
+  # ASSERT_BREAKPOINT_ENABLED  0x10
+  # ASSERT_DEADLOOP_ENABLED    0x20
+!if $(TARGET) == RELEASE
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x21
+!else
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
+!endif
+
+  #  DEBUG_INIT      0x00000001  // Initialization
+  #  DEBUG_WARN      0x00000002  // Warnings
+  #  DEBUG_LOAD      0x00000004  // Load events
+  #  DEBUG_FS        0x00000008  // EFI File system
+  #  DEBUG_POOL      0x00000010  // Alloc & Free's
+  #  DEBUG_PAGE      0x00000020  // Alloc & Free's
+  #  DEBUG_INFO      0x00000040  // Informational debug messages
+  #  DEBUG_DISPATCH  0x00000080  // PEI/DXE/SMM Dispatchers
+  #  DEBUG_VARIABLE  0x00000100  // Variable
+  #  DEBUG_BM        0x00000400  // Boot Manager
+  #  DEBUG_BLKIO     0x00001000  // BlkIo Driver
+  #  DEBUG_NET       0x00004000  // SNI Driver
+  #  DEBUG_UNDI      0x00010000  // UNDI Driver
+  #  DEBUG_LOADFILE  0x00020000  // UNDI Driver
+  #  DEBUG_EVENT     0x00080000  // Event messages
+  #  DEBUG_GCD       0x00100000  // Global Coherency Database changes
+  #  DEBUG_CACHE     0x00200000  // Memory range cachability changes
+  #  DEBUG_VERBOSE   0x00400000  // Detailed debug messages that may
+  #                              // significantly impact boot performance
+  #  DEBUG_ERROR     0x80000000  // Error
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
+
+[PcdsPatchableInModule.common]
+  #
+  # Minimum to boot with skiboot is 2GB, but announce 64MB for now.
+  #
+  gPPC64TokenSpaceGuid.PcdSystemMemorySize|0x4000000
 
 [Components.common]
   #
