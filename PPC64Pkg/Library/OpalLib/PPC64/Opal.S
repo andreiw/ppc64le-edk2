@@ -48,6 +48,7 @@
 	li	r0, token;				\
 	b	opal_call_common;
 opal_call_common:
+	std	r2, STACK_TOC(r1)
 	mflr	r12
 	std	r12,STACK_LR(r1)
 	mfcr	r12;
@@ -98,7 +99,7 @@ ASM_FUNC(opal_return)
 	 */
 	FIXUP_ENDIAN
 	mtmsr	r14
-	ld	r2, PCR(Toc)
+	ld	r2, STACK_TOC(r1)
 	ld	r12,STACK_CR(r1)
 	mtcr	r12
 	ld	r12,STACK_LR(r1)

@@ -197,7 +197,7 @@ VOID
 CEntryPoint (
 	IN EFI_PHYSICAL_ADDRESS FDTBase,
 	IN EFI_PHYSICAL_ADDRESS StackBase,
-	IN EFI_PHYSICAL_ADDRESS PHITBase
+	IN EFI_PHYSICAL_ADDRESS IplRAMBase
 	)
 {
 	EFI_STATUS Status;
@@ -213,14 +213,14 @@ CEntryPoint (
 	ASSERT (fdt_check_header ((VOID *) FDTBase) == 0);
 	FDTSize = fdt_totalsize ((VOID *) FDTBase);
 
-	DEBUG((EFI_D_INFO, "FDT   @ 0x%lx-0x%lx\n",
+	DEBUG((EFI_D_INFO, "FDT     @ 0x%lx-0x%lx\n",
 	       FDTBase, FDTBase + FDTSize));
-	DEBUG((EFI_D_INFO, "Stack @ 0x%lx-0x%lx\n",
+	DEBUG((EFI_D_INFO, "Stack   @ 0x%lx-0x%lx\n",
 	       StackBase, StackBase +
 	       PcdGet32 (PcdCPUCorePrimaryStackSize)));
-	DEBUG((EFI_D_INFO, "Hobs  @ 0x%lx-0x%lx\n",
-	       PHITBase, PHITBase +
-	       PcdGet32 (PcdPHITRegionSize)));
+	DEBUG((EFI_D_INFO, "Ipl RAM @ 0x%lx-0x%lx\n",
+	       IplRAMBase, IplRAMBase +
+	       PcdGet32 (PcdIplRAMRegionSize)));
 
 	InitializeSystemMemory (FDTBase);
 
@@ -229,10 +229,17 @@ CEntryPoint (
 		PcdGet64 (PcdSystemMemoryBase) +
 		PcdGet64 (PcdSystemMemorySize) - 1));
 
+	/*
+	 * Everything bween IplRAMBase and StackBase is
+	 * available for allocations.
+	 *
+	 * [StackBase, IplRAMBase + PcdIplRAMRegionSize) is
+	 * RAM reserved for stack and the PCR.
+	 */
 	HobList = HobConstructor (
-		(VOID *) PHITBase,
-		PcdGet32 (PcdPHITRegionSize),
-		(VOID *) PHITBase,
+		(VOID *) IplRAMBase,
+		PcdGet32 (PcdIplRAMRegionSize),
+		(VOID *) IplRAMBase,
 		(VOID *) StackBase);
 	PrePeiSetHobList (HobList);
 

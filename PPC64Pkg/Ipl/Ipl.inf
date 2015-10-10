@@ -64,7 +64,7 @@
   gPPC64TokenSpaceGuid.PcdFvSize
   gPPC64TokenSpaceGuid.PcdCPUCorePrimaryStackSize
   gPPC64TokenSpaceGuid.PcdSystemMemoryBase
-  gPPC64TokenSpaceGuid.PcdPHITRegionSize
+  gPPC64TokenSpaceGuid.PcdIplRAMRegionSize
 
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize

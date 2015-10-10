@@ -6,7 +6,9 @@ This is "UEFI" on top of OPAL firmware.
 "UEFI" because the specification doesn't include PowerPC yet (ever?).
 
 At some point this experiment will implement reduced-hardware
-ACPI support (with DTD).
+"ACPI" support, mapping the OPAL-based FDT into "ACPI" structures.
+
+"ACPI" because it's also not specced out for PowerPC.
 
 It's getting prototyped on top of QEMU and Skiboot (OPAL firmware).
 
@@ -29,8 +31,15 @@ layer for the machine.
 Status
 ======
 
-We're not in UEFI (DXE) yet, but we can build portions of edk2
-and have a PrePi-like Ipl that is finished.
+We don't boot to the UEFI Shell, yet.
+
+The EDK2 build tools have been adapted to work for ppc64le targets,
+but the reset vector support could use more love to avoid needing
+another ELF payload for Skiboot to actually pass control to the FD.
+
+We're are in UEFI proper already (DXE), but there are a lot of things
+missing, including many stubbed out functions. Also, we don't bother
+with MMU or caches for the moment.
 
 Building
 ========
@@ -67,25 +76,81 @@ passed as initrd. You should now see:
 initrd is 0x40000000-0x40200000
 ABIv1
 calling 0x40001008
-PPC64LE UEFI firmware (version 0 built at 02:29:26 on Oct 10 2015)
-FDT   @ 0x30350798-0x303534B9
-Stack @ 0x40230000-0x40240000
-Hobs  @ 0x40200000-0x40240000
-System RAM @ 0x0 - 0xFFFFFFFF
+PPC64LE UEFI firmware (version 0 built at 03:46:03 on Oct 10 2015)
+FDT     @ 0x30350798-0x303534B9
+Stack   @ 0x405EF000-0x405FF000
+Ipl RAM @ 0x40200000-0x40600000
+System RAM @ 0x0 - 0x7FFFFFFF
 /memreserve/ 0x31C00000 0x20000;
 /memreserve/ 0x31000000 0xC00000;
 /memreserve/ 0x30300000 0xD00000;
 /memreserve/ 0x30000000 0x300000;
 /memreserve/ 0x39C00000 0x1C0200;
 FIXME: Going to skip all 0x30000000-0x39DC0200
+Loading DxeCore at 0x00405AB000 EntryPoint=0x00405E9460
+CoreInitializeMemoryServices:
+  BaseAddress - 0x40600000 Length - 0x3FA00000 MinimalMemorySizeNeeded - 0x10000
+  InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 405E8418
+  HOBLIST address in DXE = 0x7FFFC018
+  Memory Allocation 0x00000004 0x405EF000 - 0x405FEFFF
+  Memory Allocation 0x00000004 0x405AB000 - 0x405EEFFF
+  Memory Allocation 0x00000003 0x405AB000 - 0x405EEFFF
+  FV Hob            0x40000000 - 0x401FFFFF
+  InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 405E83A8
+  InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 7FFF8270
+  InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 7FFF8658
+  InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A 7FFF7C70
+  InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 405E83C8
+
+Security Arch Protocol not present!!
+
+CPU Arch Protocol not present!!
+
+Metronome Arch Protocol not present!!
+
+Timer Arch Protocol not present!!
+
+Bds Arch Protocol not present!!
+
+Watchdog Timer Arch Protocol not present!!
+
+Runtime Arch Protocol not present!!
+
+Variable Arch Protocol not present!!
+
+Variable Write Arch Protocol not present!!
+
+Capsule Arch Protocol not present!!
+
+Monotonic Counter Arch Protocol not present!!
+
+Reset Arch Protocol not present!!
+
+Real Time Clock Arch Protocol not present!!
 
 ASSERT_EFI_ERROR (Status = Not Found)
-ASSERT /home/andreiw/src/edk2/PPC64Pkg/Ipl/Ipl.c(262): !EFI_ERROR (Status)
+ASSERT /home/andreiw/src/edk2/MdeModulePkg/Core/Dxe/DxeMain/DxeMain.c(497): !EFI_ERROR (Status)
 
-...as we don't build the DXE core yet.
+...now I need to provide the architecture protocols.
 
-Design considerations
-=====================
+
+Architecture considerations
+===========================
+
+Code is currently built with ABIv1 to avoid --emit-relocs creating a bunch
+of 16-bit TOC relocations that I have no hope of converting to PE32+ base relocs.
+
+It seems that it should be possible to build as PIE (ET_DYN) ABIv2 and convert
+R_PPC64_RELATIVE to base relocs as well, but that will involve a bit more
+changes to GenFw/ElfConvert, as the later deals with section-specific
+".rela.blah" sections, not runtime ".rela" that has no section back-
+reference. In the end I think that's the only agreeable approach
+(who wants to call an ABIv1 EFI runtime service from an ABIv2 OS? not me...),
+but I'd rather make some forward progress without turtling more with the
+build tools.
+
+Platform considerations
+=======================
 
 The booting flow on a PowerNV machine would look something like:
 
@@ -102,16 +167,21 @@ The booting flow on a PowerNV machine would look something like:
 ------------
      |
 -----v------
-|   DXE    |   This is proper UEFI
+|   DXE    |   This is proper UEFI.
 ------------
      |
 -----v------
 |   BDS    |   This is proper UEFI: we chose to boot an OS here.
 ------------
      |
-- ---v------
+-----v------
 |    OS    |   OS can use FDT or ACPI.
 ------------
 
 The approach taken is encouraged by AArch32 UEFI implementations
 and by AArch64 Xen/QEMU virtual UEFI.
+
+Contact Info
+============
+
+Andrei Warkentin (andrey.warkentin@gmail.com).

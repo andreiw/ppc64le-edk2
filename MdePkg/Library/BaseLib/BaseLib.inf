@@ -504,6 +504,7 @@
 [Sources.PPC64]
    PPC64/SwitchStack.S
    PPC64/CpuBreakpoint.S
+   PPC64/SetJump.c
    Unaligned.c
    Math64.c
 

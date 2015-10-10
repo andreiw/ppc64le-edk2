@@ -15,7 +15,6 @@
 
 #ifndef __ASSEMBLY__
 typedef struct _PCR {
-	UINT64 Toc;
 	UINT64 OPALBase;
 	UINT64 OPALEntry;
 	UINT64 SLBSize;
@@ -31,13 +30,13 @@ PcrGet(void)
 	return pcr;
 }
 #else
-#define PCR_Toc                      0
-#define PCR_OPALBase                 8
-#define PCR_OPALEntry               16
-#define PCR_SLBSize                 24
-#define PCR_UnrecSP                 32
-#define PCR_KernSP                  40
-#define PCR_TBFreq                  48
+#define PCR_OPALBase                 0
+#define PCR_OPALEntry                8
+#define PCR_SLBSize                 16
+#define PCR_UnrecSP                 24
+#define PCR_KernSP                  32
+#define PCR_TBFreq                  40
+#define PCR_Size                    0x1000
 #define PCR_R(name, reg) (PCR_ ## name)(reg)
 #define PCR(name) PCR_R(name, r13)
 

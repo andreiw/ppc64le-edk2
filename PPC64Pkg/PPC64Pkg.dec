@@ -47,7 +47,7 @@
   gPPC64TokenSpaceGuid.PcdFvSize|0|UINT32|0x00001002
   gPPC64TokenSpaceGuid.PcdCoreCount|1|UINT32|0x00001003
   gPPC64TokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x10000|UINT32|0x00001004
-  gPPC64TokenSpaceGuid.PcdPHITRegionSize|0x00040000|UINT32|0x00001005
+  gPPC64TokenSpaceGuid.PcdIplRAMRegionSize|0x00400000|UINT32|0x00001005
 
 [PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
   gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0|UINT64|0x00002001

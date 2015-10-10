@@ -151,9 +151,9 @@
   #
   # DXE
   #
-  #MdeModulePkg/Core/Dxe/DxeMain.inf {
-  #  <LibraryClasses>
-  #    PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-  #    NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
-  #}
+  MdeModulePkg/Core/Dxe/DxeMain.inf {
+    <LibraryClasses>
+      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+      NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+  }
   PPC64Pkg/Application/Test/Test.inf

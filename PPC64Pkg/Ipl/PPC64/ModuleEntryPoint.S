@@ -21,23 +21,29 @@
 ASM_FUNC(_ModuleEntryPoint)
 	LOAD_TOC(r2)
 
-	LOAD_ADDR(r13, PrimaryPCR)
-	std	r2, PCR(Toc)
-	std	r4, PCR(OPALBase)
-	std	r5, PCR(OPALEntry)
+	mr	r24, r4
+	mr	r25, r5
 
+	//
+	// The FD is followed by a block of memory used by
+	// Ipl allocations. The top of that is the PCR
+	// page, pointed to by r13, and right below that
+	// is the stack.
+	//
 	LOAD_IMM64(r5, FixedPcdGet32(PcdFdBaseAddress))
 	LOAD_IMM64(r6, FixedPcdGet32(PcdFdSize))
 	add	r5, r5, r6
-	LOAD_IMM64(r1, FixedPcdGet32(PcdPHITRegionSize))
-	add	r1, r5, r1
+	LOAD_IMM64(r1, FixedPcdGet32(PcdIplRAMRegionSize) - PCR_Size)
+	add	r13, r5, r1
 	LOAD_IMM64(r4, FixedPcdGet32(PcdCPUCorePrimaryStackSize))
-	sub	r4, r1, r4
-	subi	r1, r1, STACK_FRAME_MIN
+	sub	r4, r13, r4
+	subi	r1, r13, STACK_FRAME_MIN
 
+	std	r24, PCR(OPALBase)
+	std	r25, PCR(OPALEntry)
 
 	//
-	// Go C: r3 = FDT, r4 = stack base, r5 = PHIT memory
+	// Go C: r3 = FDT, r4 = stack base, r5 = Ipl RAM.
 	//
 	bl	CEntryPoint
 	ori	0, 0, 0
