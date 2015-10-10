@@ -1,0 +1,117 @@
+TianoCore on PowerPC 64 Little-Endian (OPAL/PowerNV)
+====================================================
+
+This is "UEFI" on top of OPAL firmware.
+
+"UEFI" because the specification doesn't include PowerPC yet (ever?).
+
+At some point this experiment will implement reduced-hardware
+ACPI support (with DTD).
+
+It's getting prototyped on top of QEMU and Skiboot (OPAL firmware).
+
+Why
+===
+
+It's thought experiment gone too far. In short, there's IMO
+value in presenting a common firmware environment shared with
+other servers (X64, AARCH64). UEFI+ACPI keep the OEMs and IHVs in their
+comfort zone, and reduce pointless platform boot and configuration
+variance across different architectures. It also allows plug-in cards
+to work (assuming EBC ROMs). Petitboot is a nice idea in theory,
+but in practice it's probably more suitable to embedded environments
+rather than whitebox servers that can compete with Intel boxes.
+
+UEFI gets us a bootloader environment and device drivers for
+I/O and booting via storage and networking. OPAL is the abstraction
+layer for the machine.
+
+Status
+======
+
+We're not in UEFI (DXE) yet, but we can build portions of edk2
+and have a PrePi-like Ipl that is finished.
+
+Building
+========
+
+You will need a LE 64-bit toolchain to build (i.e. ppc64le-linux).
+A good source of toolchains is kernel.org.
+
+After running ./edksetup.sh, modify your Conf/target.txt:
+ACTIVE_PLATFORM       = PPC64Pkg/PPC64Pkg.dsc
+TOOL_CHAIN_TAG        = GCC49
+
+Then:
+$ GCC49_PPC64_PREFIX=ppc64le-linux- build
+
+Running
+=======
+
+You will need Skiboot and Benjamin Herrenschmidt's PowerNV QEMU tree.
+
+Good directions for both QEMU/PowerNV and Skiboot:
+https://www.flamingspork.com/blog/2015/08/28/running-opal-in-qemu-the-powernv-platform/
+
+Until I fix the toolchain to create a self-booting UEFI FD, you will
+also need http://github.com/andreiw/ppc64le_hello as a loader. See README
+for building instructions.
+
+After that, assuming skiboot.lid is in current working directory,
+$ qemu-system-ppc64 -m 4G -M powernv -kernel ppc64le_hello -nographic -initrd ~/src/edk2/Build/PPC64/DEBUG_GCC49/FV/POWERNV.fd
+
+You shall see some spew from Skiboot followed by a menu printed by
+ppc64le_hello. Press 'I' at the menu since we want to run the FD image
+passed as initrd. You should now see:
+
+initrd is 0x40000000-0x40200000
+ABIv1
+calling 0x40001008
+PPC64LE UEFI firmware (version 0 built at 02:29:26 on Oct 10 2015)
+FDT   @ 0x30350798-0x303534B9
+Stack @ 0x40230000-0x40240000
+Hobs  @ 0x40200000-0x40240000
+System RAM @ 0x0 - 0xFFFFFFFF
+/memreserve/ 0x31C00000 0x20000;
+/memreserve/ 0x31000000 0xC00000;
+/memreserve/ 0x30300000 0xD00000;
+/memreserve/ 0x30000000 0x300000;
+/memreserve/ 0x39C00000 0x1C0200;
+FIXME: Going to skip all 0x30000000-0x39DC0200
+
+ASSERT_EFI_ERROR (Status = Not Found)
+ASSERT /home/andreiw/src/edk2/PPC64Pkg/Ipl/Ipl.c(262): !EFI_ERROR (Status)
+
+...as we don't build the DXE core yet.
+
+Design considerations
+=====================
+
+The booting flow on a PowerNV machine would look something like:
+
+-----------  
+| hostboot |   This is the low-level initialization.
+------------
+     |
+-----v------
+| skiboot  |   This is the OPAL firmware.
+------------
+     |
+-----v------
+|   Ipl    |   This is UEFI loader that uses passed FDT and OPAL.
+------------
+     |
+-----v------
+|   DXE    |   This is proper UEFI
+------------
+     |
+-----v------
+|   BDS    |   This is proper UEFI: we chose to boot an OS here.
+------------
+     |
+- ---v------
+|    OS    |   OS can use FDT or ACPI.
+------------
+
+The approach taken is encouraged by AArch32 UEFI implementations
+and by AArch64 Xen/QEMU virtual UEFI.
