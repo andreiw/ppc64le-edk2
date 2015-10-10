@@ -140,10 +140,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
 
 [PcdsPatchableInModule.common]
-  #
-  # Minimum to boot with skiboot is 2GB, but announce 64MB for now.
-  #
-  gPPC64TokenSpaceGuid.PcdSystemMemorySize|0x4000000
+  gPPC64TokenSpaceGuid.PcdSystemMemorySize|0x0
 
 [Components.common]
   #

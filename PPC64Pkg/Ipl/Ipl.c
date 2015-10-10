@@ -119,10 +119,85 @@ InitializeSystemMemory (
 
 
 VOID
+BuildMemoryHobs (
+	IN VOID *FDT,
+	IN EFI_PHYSICAL_ADDRESS UefiMemoryBase,
+	IN UINT64 UefiMemorySize
+	)
+{
+	UINTN Index;
+	UINTN NumResv;
+	EFI_PHYSICAL_ADDRESS StartReserved = -1;
+	EFI_PHYSICAL_ADDRESS EndReserved = 0;
+	EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttributes;
+
+	ResourceAttributes = (
+		EFI_RESOURCE_ATTRIBUTE_PRESENT |
+		EFI_RESOURCE_ATTRIBUTE_INITIALIZED |
+		EFI_RESOURCE_ATTRIBUTE_UNCACHEABLE |
+		EFI_RESOURCE_ATTRIBUTE_WRITE_COMBINEABLE |
+		EFI_RESOURCE_ATTRIBUTE_WRITE_THROUGH_CACHEABLE |
+		EFI_RESOURCE_ATTRIBUTE_WRITE_BACK_CACHEABLE |
+		EFI_RESOURCE_ATTRIBUTE_TESTED
+		);
+
+	NumResv = fdt_num_mem_rsv(FDT);
+
+	/*
+	 * These ranges don't have to be sorted and aren't.
+	 * For now do the saddest thing ever and just skip
+	 * the entire block. Will have to revisit this again...
+	 */
+	for (Index = 0; Index < NumResv; Index++) {
+		UINT64 Size;
+		EFI_PHYSICAL_ADDRESS Addr;
+		if (fdt_get_mem_rsv(FDT, Index, &Addr, &Size) != 0) {
+			break;
+		}
+
+		DEBUG((EFI_D_INFO, "/memreserve/ 0x%lx 0x%lx;\n",
+		       Addr, Size));
+
+		if (Addr < StartReserved) {
+			StartReserved = Addr;
+		}
+
+		if (Addr + Size > EndReserved) {
+			EndReserved = Addr + Size;
+		}
+	}
+
+	if (StartReserved < EndReserved) {
+		DEBUG((EFI_D_INFO, "FIXME: Going to skip all 0x%lx-0x%lx\n",
+		       StartReserved, EndReserved));
+		BuildResourceDescriptorHob (
+			EFI_RESOURCE_SYSTEM_MEMORY,
+			ResourceAttributes,
+			UefiMemoryBase,
+			StartReserved - UefiMemoryBase
+			);
+		BuildResourceDescriptorHob (
+			EFI_RESOURCE_SYSTEM_MEMORY,
+			ResourceAttributes,
+			EndReserved,
+			(UefiMemoryBase + UefiMemorySize) - EndReserved
+			);
+	} else {
+		BuildResourceDescriptorHob (
+			EFI_RESOURCE_SYSTEM_MEMORY,
+			ResourceAttributes,
+			UefiMemoryBase,
+			UefiMemorySize
+			);
+	}
+}
+
+
+VOID
 CEntryPoint (
-	EFI_PHYSICAL_ADDRESS FDTBase,
-	EFI_PHYSICAL_ADDRESS StackBase,
-	EFI_PHYSICAL_ADDRESS PHITBase
+	IN EFI_PHYSICAL_ADDRESS FDTBase,
+	IN EFI_PHYSICAL_ADDRESS StackBase,
+	IN EFI_PHYSICAL_ADDRESS PHITBase
 	)
 {
 	EFI_STATUS Status;
@@ -160,6 +235,9 @@ CEntryPoint (
 		(VOID *) PHITBase,
 		(VOID *) StackBase);
 	PrePeiSetHobList (HobList);
+
+	BuildMemoryHobs ((VOID *) FDTBase, PcdGet64 (PcdSystemMemoryBase),
+			 PcdGet64 (PcdSystemMemorySize));
 
 	BuildStackHob (StackBase, PcdGet32 (PcdCPUCorePrimaryStackSize));
 	BuildCpuHob (PcdGet8 (PcdPrePiCpuMemorySize), PcdGet8 (PcdPrePiCpuIoSize));
