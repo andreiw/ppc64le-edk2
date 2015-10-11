@@ -35,6 +35,7 @@
 [LibraryClasses.common]
   OpalLib|PPC64Pkg/Library/OpalLib/OpalLib.inf
   SerialPortLib|PPC64Pkg/Library/OpalSerialPortLib/OpalSerialPortLib.inf
+  SerialPortExtLib|EmbeddedPkg/Library/TemplateSerialPortExtLib/TemplateSerialPortExtLib.inf
 
   CacheMaintenanceLib|PPC64Pkg/Library/PPC64CacheMaintenanceLib/PPC64CacheMaintenanceLib.inf
   CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
@@ -43,6 +44,7 @@
   DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
   DebugAgentTimerLib|EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
 
+  CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
@@ -57,6 +59,7 @@
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+  UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
   PeCoffGetEntryPointLib|MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
   UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
@@ -81,6 +84,23 @@
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
 
 [LibraryClasses.common.DXE_DRIVER]
+  DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+  SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
+  ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
+
+[LibraryClasses.common.UEFI_DRIVER]
+  ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
+  UefiDecompressLib|IntelFrameworkModulePkg/Library/BaseUefiTianoCustomDecompressLib/BaseUefiTianoCustomDecompressLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+  DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+
+[LibraryClasses.common.DXE_RUNTIME_DRIVER]
+  ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  ResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf
+  RealTimeClockLib|PPC64Pkg/Library/OpalRealTimeClockLib/OpalRealTimeClockLib.inf
 
 [LibraryClasses.common.DXE_CORE]
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
@@ -104,6 +124,9 @@
 [PcdsFixedAtBuild.common]
   gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0x0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"$(FIRMWARE_VER)"
+
+  # Set terminal type to TtyTerm, the value encoded is EFI_TTY_TERM_GUID
+  gPPC64TokenSpaceGuid.PcdTerminalTypeGuidBuffer|{0x80, 0x6d, 0x91, 0x7d, 0xb1, 0x5b, 0x8c, 0x45, 0xa4, 0x8f, 0xe2, 0x5f, 0xdd, 0x51, 0xef, 0x94}
 
   # DEBUG_ASSERT_ENABLED       0x01
   # DEBUG_PRINT_ENABLED        0x02
@@ -156,4 +179,38 @@
       PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
       NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
   }
-  PPC64Pkg/Application/Test/Test.inf
+
+  #
+  # Architectural Protocols
+  #
+  PPC64Pkg/Drivers/CpuDxe/CpuDxe.inf
+  PPC64Pkg/Drivers/TimerDxe/TimerDxe.inf
+  MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
+  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
+  MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
+  MdeModulePkg/Universal/Variable/EmuRuntimeDxe/EmuVariableRuntimeDxe.inf
+  MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+  EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
+  EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
+  MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
+  MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
+
+  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
+  MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
+  EmbeddedPkg/SerialDxe/SerialDxe.inf
+
+  #
+  # Bds
+  #
+  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+  MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf {
+    <LibraryClasses>
+      CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
+  }
+  MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
+  IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf {
+    <LibraryClasses>
+      GenericBdsLib|IntelFrameworkModulePkg/Library/GenericBdsLib/GenericBdsLib.inf
+      PlatformBdsLib|PPC64Pkg/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
+  }

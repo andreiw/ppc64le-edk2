@@ -504,7 +504,7 @@
 [Sources.PPC64]
    PPC64/SwitchStack.S
    PPC64/CpuBreakpoint.S
-   PPC64/SetJump.c
+   PPC64/SetJump.S
    Unaligned.c
    Math64.c
 
@@ -513,8 +513,6 @@
 #  PPC64/EnableInterrupts.S        | GCC
 #  PPC64/DisableInterrupts.S       | GCC
 #  PPC64/GetInterruptsState.S      | GCC
-#  PPC64/SetJumpLongJump.S         | GCC
-#  PPC64/CpuBreakpoint.S           | GCC
 
 [Packages]
   MdePkg/MdePkg.dec

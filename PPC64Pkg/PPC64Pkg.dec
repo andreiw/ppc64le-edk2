@@ -52,6 +52,12 @@
 [PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
   gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0|UINT64|0x00002001
   gPPC64TokenSpaceGuid.PcdSystemMemorySize|0|UINT64|0x00002002
+  #
+  # Binary representation of the GUID that determines the terminal type. The
+  # size must be exactly 16 bytes. The default value corresponds to
+  # EFI_VT_100_GUID.
+  #
+  gPPC64TokenSpaceGuid.PcdTerminalTypeGuidBuffer|{0x65, 0x60, 0xA6, 0xDF, 0x19, 0xB4, 0xD3, 0x11, 0x9A, 0x2D, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D}|VOID*|0x00002003
 
 [PcdsFixedAtBuild.common, PcdsPatchableInModule.common]
   gPPC64TokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x00003001
