@@ -73,34 +73,37 @@ You shall see some spew from Skiboot followed by a menu printed by
 ppc64le_hello. Press 'I' at the menu since we want to run the FD image
 passed as initrd. You should now see:
 
-initrd is 0x40000000-0x40200000
 ABIv1
 calling 0x40001008
-PPC64LE UEFI firmware (version 0 built at 03:46:03 on Oct 10 2015)
-FDT     @ 0x30350798-0x303534B9
-Stack   @ 0x405EF000-0x405FF000
-Ipl RAM @ 0x40200000-0x40600000
-System RAM @ 0x0 - 0x7FFFFFFF
+PPC64LE UEFI firmware (version 0 built at 00:33:43 on Oct 11 2015)
+System RAM @ 0x0 - 0xFFFFFFFF
+Ipl total @ 0x40000000-0x40611000
+Ipl used  @ 0x40000000-0x40211000
+Stack     @ 0x40200000-0x40210000
+Ipl free  @ 0x40211000-0x40611000
+FDT @ 0x4060E000-0x40610D21
 /memreserve/ 0x31C00000 0x20000;
 /memreserve/ 0x31000000 0xC00000;
 /memreserve/ 0x30300000 0xD00000;
 /memreserve/ 0x30000000 0x300000;
 /memreserve/ 0x39C00000 0x1C0200;
 FIXME: Going to skip all 0x30000000-0x39DC0200
-Loading DxeCore at 0x00405AB000 EntryPoint=0x00405E9460
+Loading DxeCore at 0x00405CA000 EntryPoint=0x0040608460
 CoreInitializeMemoryServices:
-  BaseAddress - 0x40600000 Length - 0x3FA00000 MinimalMemorySizeNeeded - 0x10000
-  InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 405E8418
-  HOBLIST address in DXE = 0x7FFFC018
-  Memory Allocation 0x00000004 0x405EF000 - 0x405FEFFF
-  Memory Allocation 0x00000004 0x405AB000 - 0x405EEFFF
-  Memory Allocation 0x00000003 0x405AB000 - 0x405EEFFF
+  BaseAddress - 0x40611000 Length - 0xBF9EF000 MinimalMemorySizeNeeded - 0x10000
+  InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 40607418
+  HOBLIST address in DXE = 0xFFFFC018
+  Memory Allocation 0x00000004 0x40000000 - 0x40210FFF
+  Memory Allocation 0x00000004 0x4060E000 - 0x40610FFF
+  Memory Allocation 0x00000004 0x40200000 - 0x4020FFFF
+  Memory Allocation 0x00000004 0x405CA000 - 0x4060DFFF
+  Memory Allocation 0x00000003 0x405CA000 - 0x4060DFFF
   FV Hob            0x40000000 - 0x401FFFFF
-  InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 405E83A8
-  InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 7FFF8270
-  InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 7FFF8658
-  InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A 7FFF7C70
-  InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 405E83C8
+  InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 406073A8
+  InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 FFFF8270
+  InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B FFFF8658
+  InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A FFFF7C70
+  InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 406073C8
 
 Security Arch Protocol not present!!
 

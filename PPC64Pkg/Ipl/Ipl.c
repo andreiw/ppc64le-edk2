@@ -61,7 +61,7 @@ Log (
 
 UINT64
 InitializeSystemMemory (
-	IN EFI_PHYSICAL_ADDRESS FDTBase
+	IN VOID *DeviceTreeBase
 	)
 {
 	INT32        Node, Prev;
@@ -73,8 +73,6 @@ InitializeSystemMemory (
 
 	NewBase = 0;
 	NewSize = 0;
-
-	VOID *DeviceTreeBase = (VOID *) FDTBase;
 
 	ASSERT (fdt_check_header (DeviceTreeBase) == 0);
 
@@ -194,15 +192,39 @@ BuildMemoryHobs (
 
 
 VOID
+BuildFdtHob(
+	IN VOID *FDTBase
+	)
+{
+	UINTN FDTSize;
+	UINTN FDTPages;
+	VOID *SafeFDT;
+	UINT64 *FDTHobData;
+
+	FDTSize = fdt_totalsize (FDTBase);
+
+	FDTPages = EFI_SIZE_TO_PAGES (FDTSize);
+	SafeFDT = AllocatePages (FDTPages);
+	ASSERT (SafeFDT != NULL);
+	fdt_open_into (FDTBase, SafeFDT, FDTSize);
+
+	DEBUG((EFI_D_INFO, "FDT @ 0x%lx-0x%lx\n",
+	       (UINTN) SafeFDT, (UINTN) SafeFDT + FDTSize));
+
+	FDTHobData = BuildGuidHob (&gFdtHobGuid, sizeof *FDTHobData);
+	*FDTHobData = (UINT64) SafeFDT;
+}
+
+VOID
 CEntryPoint (
 	IN EFI_PHYSICAL_ADDRESS FDTBase,
+	IN EFI_PHYSICAL_ADDRESS IplMemoryBottom,
 	IN EFI_PHYSICAL_ADDRESS StackBase,
-	IN EFI_PHYSICAL_ADDRESS IplRAMBase
+	IN EFI_PHYSICAL_ADDRESS IplFreeMemoryBottom,
+	IN EFI_PHYSICAL_ADDRESS IplMemoryTop
 	)
 {
 	EFI_STATUS Status;
-	UINTN FDTSize;
-	UINT64 *FDTHobData;
 	EFI_HOB_HANDOFF_INFO_TABLE *HobList;
 
 	SerialPortInitialize ();
@@ -210,39 +232,39 @@ CEntryPoint (
 	Log (L"PPC64LE UEFI firmware (version %s built at %a on %a)\n",
 	    (CHAR16*) PcdGetPtr (PcdFirmwareVersionString), __TIME__, __DATE__);
 
-	ASSERT (fdt_check_header ((VOID *) FDTBase) == 0);
-	FDTSize = fdt_totalsize ((VOID *) FDTBase);
-
-	DEBUG((EFI_D_INFO, "FDT     @ 0x%lx-0x%lx\n",
-	       FDTBase, FDTBase + FDTSize));
-	DEBUG((EFI_D_INFO, "Stack   @ 0x%lx-0x%lx\n",
-	       StackBase, StackBase +
-	       PcdGet32 (PcdCPUCorePrimaryStackSize)));
-	DEBUG((EFI_D_INFO, "Ipl RAM @ 0x%lx-0x%lx\n",
-	       IplRAMBase, IplRAMBase +
-	       PcdGet32 (PcdIplRAMRegionSize)));
-
-	InitializeSystemMemory (FDTBase);
-
+	InitializeSystemMemory ((VOID *) FDTBase);
 	DEBUG ((EFI_D_INFO, "System RAM @ 0x%lx - 0x%lx\n",
 		PcdGet64 (PcdSystemMemoryBase),
 		PcdGet64 (PcdSystemMemoryBase) +
 		PcdGet64 (PcdSystemMemorySize) - 1));
 
+	DEBUG((EFI_D_INFO, "Ipl total @ 0x%lx-0x%lx\n",
+	       IplMemoryBottom, IplMemoryTop));
+	DEBUG((EFI_D_INFO, "Ipl used  @ 0x%lx-0x%lx\n",
+	       IplMemoryBottom, IplFreeMemoryBottom));
+	DEBUG((EFI_D_INFO, "Stack     @ 0x%lx-0x%lx\n",
+	       StackBase, StackBase +
+	       PcdGet32 (PcdCPUCorePrimaryStackSize)));
+	DEBUG((EFI_D_INFO, "Ipl free  @ 0x%lx-0x%lx\n",
+	       IplFreeMemoryBottom, IplMemoryTop));
+
 	/*
-	 * Everything bween IplRAMBase and StackBase is
-	 * available for allocations.
+	 * Everything bween IplFreeMemoryBottom and IplMemoryTop.
 	 *
-	 * [StackBase, IplRAMBase + PcdIplRAMRegionSize) is
-	 * RAM reserved for stack and the PCR.
+	 * [IplMemoryBottom, IplFreeMemoryBottom) is
+	 * RAM reserved for FD, stack and PCR.
 	 */
 	HobList = HobConstructor (
-		(VOID *) IplRAMBase,
-		PcdGet32 (PcdIplRAMRegionSize),
-		(VOID *) IplRAMBase,
-		(VOID *) StackBase);
+		(VOID *) IplMemoryBottom,
+		IplMemoryTop - IplMemoryBottom,
+		(VOID *) IplFreeMemoryBottom,
+		(VOID *) IplMemoryTop);
 	PrePeiSetHobList (HobList);
+	BuildMemoryAllocationHob (IplMemoryBottom,
+				  IplFreeMemoryBottom - IplMemoryBottom,
+				  EfiBootServicesData);
 
+	BuildFdtHob((VOID *) FDTBase);
 	BuildMemoryHobs ((VOID *) FDTBase, PcdGet64 (PcdSystemMemoryBase),
 			 PcdGet64 (PcdSystemMemorySize));
 
@@ -250,8 +272,6 @@ CEntryPoint (
 	BuildCpuHob (PcdGet8 (PcdPrePiCpuMemorySize), PcdGet8 (PcdPrePiCpuIoSize));
 	SetBootMode (BOOT_WITH_FULL_CONFIGURATION);
 	BuildFvHob (PcdGet64 (PcdFvBaseAddress), PcdGet32 (PcdFvSize));
-	FDTHobData = BuildGuidHob (&gFdtHobGuid, sizeof *FDTHobData);
-	*FDTHobData = FDTBase;
 
 	// SEC phase needs to run library constructors by hand.
 	ExtractGuidedSectionLibConstructor ();

@@ -25,26 +25,29 @@ ASM_FUNC(_ModuleEntryPoint)
 	mr	r25, r5
 
 	//
-	// The FD is followed by a block of memory used by
-	// Ipl allocations. The top of that is the PCR
-	// page, pointed to by r13, and right below that
-	// is the stack.
+	// The FD is followed by the stack, the PCR
+	// page and PcdIplRAMRegionSize more bytes for Ipl
+	// allocations.
 	//
-	LOAD_IMM64(r5, FixedPcdGet32(PcdFdBaseAddress))
-	LOAD_IMM64(r6, FixedPcdGet32(PcdFdSize))
-	add	r5, r5, r6
-	LOAD_IMM64(r1, FixedPcdGet32(PcdIplRAMRegionSize) - PCR_Size)
-	add	r13, r5, r1
-	LOAD_IMM64(r4, FixedPcdGet32(PcdCPUCorePrimaryStackSize))
-	sub	r4, r13, r4
+	LOAD_IMM64(r4, FixedPcdGet32(PcdFdBaseAddress))
+	LOAD_IMM64(r5, FixedPcdGet32(PcdFdSize))
+	add	r5, r4, r5
+	LOAD_IMM64(r13, FixedPcdGet32(PcdCPUCorePrimaryStackSize))
+	add	r13, r5, r13
 	subi	r1, r13, STACK_FRAME_MIN
+	addi	r6, r13, PCR_Size
+	LOAD_IMM64(r7, FixedPcdGet32(PcdIplRAMRegionSize))
+	add	r7, r6, r7
 
 	std	r24, PCR(OPALBase)
 	std	r25, PCR(OPALEntry)
 
 	//
-	// Go C: r3 = FDT, r4 = stack base, r5 = Ipl RAM.
-	//
+	// Go C: r3 = FDT
+	//       r4 = IplMemoryBottom
+	//       r5 = Stack base
+	//       r6 = IplFreeMemoryBottom
+	//       r7 = IplMemoryTop
 	bl	CEntryPoint
 	ori	0, 0, 0
 	b	.
