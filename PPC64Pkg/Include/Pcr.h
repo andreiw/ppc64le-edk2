@@ -17,9 +17,8 @@
 typedef struct _PCR {
 	UINT64 OPALBase;
 	UINT64 OPALEntry;
-	UINT64 SLBSize;
-	UINT64 UnrecSP;
-	UINT64 KernSP;
+	UINT64 CpuDxeUnrecSP;
+	UINT64 CpuDxeTOC;
 	UINT64 TBFreq;
 } PCR;
 
@@ -32,11 +31,10 @@ PcrGet(void)
 #else
 #define PCR_OPALBase                 0
 #define PCR_OPALEntry                8
-#define PCR_SLBSize                 16
-#define PCR_UnrecSP                 24
-#define PCR_KernSP                  32
-#define PCR_TBFreq                  40
-#define PCR_Size                    0x1000
+#define PCR_CpuDxeUnrecSP           16
+#define PCR_CpuDxeTOC               24
+#define PCR_TBFreq                  32
+#define PCR_Size                0x1000
 #define PCR_R(name, reg) (PCR_ ## name)(reg)
 #define PCR(name) PCR_R(name, r13)
 

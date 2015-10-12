@@ -32,4 +32,8 @@
 #include <Protocol/DebugSupportPeriodicCallback.h>
 #include <Protocol/LoadedImage.h>
 
+extern VOID *CpuDxeVectorsStart;
+extern VOID *CpuDxeVectorsEnd;
+VOID CpuDxeRFI(EFI_SYSTEM_CONTEXT_PPC64 *Context);
+
 #endif // __CPU_DXE_H__

@@ -474,6 +474,86 @@ typedef struct {
 } EFI_SYSTEM_CONTEXT_EBC;
 
 
+///
+/// PPC64 processor exception types (offsets, really).
+///
+#define EXCEPT_PPC64_START       0x0
+#define EXCEPT_PPC64_RESET       0x100
+#define EXCEPT_PPC64_MC          0x200
+#define EXCEPT_PPC64_DSI         0x300
+#define EXCEPT_PPC64_DSEG        0x380
+#define EXCEPT_PPC64_ISI         0x400
+#define EXCEPT_PPC64_ISEG        0x480
+#define EXCEPT_PPC64_EXT         0x500
+#define EXCEPT_PPC64_ALIGN       0x600
+#define EXCEPT_PPC64_PROG        0x700
+#define EXCEPT_PPC64_FPU         0x800
+#define EXCEPT_PPC64_DEC         0x900
+#define EXCEPT_PPC64_HDEC        0x980
+#define EXCEPT_PPC64_DOOR        0xA00
+#define EXCEPT_PPC64_RESV        0xB00
+#define EXCEPT_PPC64_SC          0xC00
+#define EXCEPT_PPC64_TRACE       0xD00
+#define EXCEPT_PPC64_HDSI        0xE00
+#define EXCEPT_PPC64_HISI        0xE20
+#define EXCEPT_PPC64_HEA         0xE40
+#define EXCEPT_PPC64_HMAINT      0xE60
+#define EXCEPT_PPC64_HDOOR       0xE80
+#define EXCEPT_PPC64_RESV1       0xEA0
+#define EXCEPT_PPC64_RESV2       0xEC0
+#define EXCEPT_PPC64_IMPL        0xEE0
+#define EXCEPT_PPC64_PMU         0xF00
+#define EXCEPT_PPC64_VECUN       0xF20
+#define EXCEPT_PPC64_VSX         0xF40
+#define EXCEPT_PPC64_FAC         0xF60
+#define EXCEPT_PPC64_HFAC        0xF80
+#define MAX_PPC64_EXCEPTION      EXCEPT_PPC64_HFAC
+
+///
+/// PPC64 processor context definition.
+///
+typedef struct {
+  UINT64 R0;
+  UINT64 R1;
+  UINT64 R2;
+  UINT64 R3;
+  UINT64 R4;
+  UINT64 R5;
+  UINT64 R6;
+  UINT64 R7;
+  UINT64 R8;
+  UINT64 R9;
+  UINT64 R10;
+  UINT64 R11;
+  UINT64 R12;
+  UINT64 R13;
+  UINT64 R14;
+  UINT64 R15;
+  UINT64 R16;
+  UINT64 R17;
+  UINT64 R18;
+  UINT64 R19;
+  UINT64 R20;
+  UINT64 R21;
+  UINT64 R22;
+  UINT64 R23;
+  UINT64 R24;
+  UINT64 R25;
+  UINT64 R26;
+  UINT64 R27;
+  UINT64 R28;
+  UINT64 R29;
+  UINT64 R30;
+  UINT64 R31;
+  UINT64 LR;
+  UINT64 CTR;
+  UINT64 XER;
+  UINT64 CR;
+  UINT64 HSSR0;
+  UINT64 HSSR1;
+  UINT64 Vec;
+} EFI_SYSTEM_CONTEXT_PPC64;
+
 
 ///
 ///  ARM processor exception types.
@@ -620,6 +700,7 @@ typedef union {
   EFI_SYSTEM_CONTEXT_IPF  *SystemContextIpf;
   EFI_SYSTEM_CONTEXT_ARM  *SystemContextArm;
   EFI_SYSTEM_CONTEXT_AARCH64  *SystemContextAArch64;
+  EFI_SYSTEM_CONTEXT_PPC64  *SystemContextPPC64;
 } EFI_SYSTEM_CONTEXT;
 
 //
@@ -661,7 +742,8 @@ typedef enum {
   IsaIpf  = IMAGE_FILE_MACHINE_IA64,           ///< 0x0200
   IsaEbc  = IMAGE_FILE_MACHINE_EBC,            ///< 0x0EBC
   IsaArm  = IMAGE_FILE_MACHINE_ARMTHUMB_MIXED, ///< 0x01c2
-  IsaAArch64  = IMAGE_FILE_MACHINE_ARM64       ///< 0xAA64
+  IsaAArch64  = IMAGE_FILE_MACHINE_ARM64,      ///< 0xAA64
+  IsaPPC64  = IMAGE_FILE_MACHINE_PPC64         ///< 0x1F0
 } EFI_INSTRUCTION_SET_ARCHITECTURE;
 
 

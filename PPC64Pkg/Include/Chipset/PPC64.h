@@ -10,8 +10,8 @@
 // WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
-#ifndef __PPC64_DEFS_H__
-#define __PPC64_DEFS_H__
+#ifndef __PPC64_H__
+#define __PPC64_H__
 
 // 48 + 64 parameter save area
 #define STACK_FRAME_MIN 112
@@ -98,4 +98,22 @@
 #define SPRN_DAR        0x013           /* Data Adress Register. */
 #define SPRN_DSISR      0x012           /* Data Storage Interrupt Status */
 
-#endif // __PPC64_DEFS_H__
+#define LPCR_ILE_LG     (63 - 38)             /* Interrupt Little Endian */
+#define LPCR_ILE        __MASK(LPCR_ILE_LG)
+#define LPCR_AIL1_LG    (63 - 39)             /* Alternate Interrupt Location 1 */
+#define LPCR_AIL1        __MASK(LPCR_AIL1_LG)
+#define LPCR_AIL0_LG    (63 - 40)             /* Alternate Interrupt Location 0 */
+#define LPCR_AIL0       __MASK(LPCR_AIL0_LG)
+#define LPCR_LPES_LG    (63 - 60)             /* Logical Part. Env. Selector */
+#define LPCR_LPES       __MASK(LPCR_LPES_LG)
+#define LPCR_HDICE_LG   (63 - 63)             /* Hypervisor Decrementer Enable */
+#define LPCR_HDICE      __MASK(LPCR_HDICE_LG)
+
+/*
+ * We can't really disable the regular decrementer, but we can set it
+ * to the maximum value that doesn't cause an interrupt, which is
+ * the value with MSB bit set to 0.
+ */
+#define DEC_DISABLE_FOR_A_WHILE 0x7fffffff
+
+#endif // __PPC64_H__

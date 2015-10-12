@@ -11,9 +11,13 @@
 //
 
 #include "CpuDxe.h"
-#include <Guid/IdleLoopEvent.h>
+#include <Pcr.h>
+#include <Library/OpalLib.h>
+#include <Chipset/PPC64Intrinsics.h>
 
-BOOLEAN mInterruptState   = FALSE;
+#define UNRECOVERABLE_EXCEPTION_STACK_PAGES 2
+
+EFI_CPU_INTERRUPT_HANDLER mHDECHandler = NULL;
 
 
 /**
@@ -83,7 +87,7 @@ CpuEnableInterrupt (
   IN EFI_CPU_ARCH_PROTOCOL          *This
   )
 {
-  mInterruptState  = TRUE;
+  mtmsrd(mfmsr() | MSR_EE, 1);
   return EFI_SUCCESS;
 }
 
@@ -103,7 +107,7 @@ CpuDisableInterrupt (
   IN EFI_CPU_ARCH_PROTOCOL          *This
   )
 {
-  mInterruptState = FALSE;
+  mtmsrd(mfmsr() & ~MSR_EE, 1);
   return EFI_SUCCESS;
 }
 
@@ -132,7 +136,8 @@ CpuGetInterruptState (
     return EFI_INVALID_PARAMETER;
   }
 
-  *State = mInterruptState;
+
+  *State = ((mfmsr() & MSR_EE) != 0);
   return EFI_SUCCESS;
 }
 
@@ -171,6 +176,16 @@ CpuRegisterInterruptHandler (
   IN EFI_CPU_INTERRUPT_HANDLER      InterruptHandler
   )
 {
+  if (InterruptType != EXCEPT_PPC64_HDEC) {
+    return EFI_UNSUPPORTED;
+  }
+
+  if (InterruptHandler != NULL &&
+      mHDECHandler != NULL) {
+    return EFI_ALREADY_STARTED;
+  }
+
+  mHDECHandler = InterruptHandler;
   return EFI_SUCCESS;
 }
 
@@ -184,23 +199,6 @@ CpuGetTimerValue (
   )
 {
   return EFI_UNSUPPORTED;
-}
-
-/**
-  Callback function for idle events.
-
-  @param  Event                 Event whose notification function is being invoked.
-  @param  Context               The pointer to the notification function's context,
-                                which is implementation-dependent.
-
-**/
-VOID
-EFIAPI
-IdleLoopEventCallback (
-  IN EFI_EVENT                Event,
-  IN VOID                     *Context
-  )
-{
 }
 
 /**
@@ -253,34 +251,102 @@ EFI_CPU_ARCH_PROTOCOL mCpu = {
   4,          // DmaBufferAlignment
 };
 
+VOID
+CpuDxeVectorHandler (
+  IN EFI_SYSTEM_CONTEXT_PPC64 *Context
+  )
+{
+  if (Context->Vec == EXCEPT_PPC64_HDEC) {
+    if (mHDECHandler != NULL) {
+      mHDECHandler(Context->Vec, (EFI_SYSTEM_CONTEXT) Context);
+      CpuDxeRFI(Context);
+    }
+  }
+
+  DEBUG((EFI_D_ERROR, "Unknown exception 0x%x for 0x%016lx!\n",
+         Context->Vec, Context->LR));
+  ASSERT(FALSE);
+  while (1);
+}
+
+EFI_PHYSICAL_ADDRESS
+CpuDxeMyTOC (
+  VOID
+  )
+{
+  register UINT64 R2 asm("r2");
+  return R2;
+}
+
 EFI_STATUS
 CpuDxeInitialize (
   IN EFI_HANDLE         ImageHandle,
   IN EFI_SYSTEM_TABLE   *SystemTable
   )
 {
-  EFI_STATUS  Status;
-  EFI_EVENT   IdleLoopEvent;
+  EFI_STATUS Status;
+  OPAL_STATUS OpalStatus;
+  EFI_PHYSICAL_ADDRESS UnrecStack;
+  EFI_PHYSICAL_ADDRESS Vectors;
 
+  PcrGet()->CpuDxeTOC = CpuDxeMyTOC();
+  DEBUG((EFI_D_ERROR, "My TOC is at 0x%lx\n", PcrGet()->CpuDxeTOC));
+
+  /*
+   * MSR.ILE controls supervisor exception endianness. OPAL
+   * takes care of setting the hypervisor exception endianness
+   * bit in an implementation-neutral fashion. Mambo systemsim
+   * doesn't seem to report a PVR version that Skiboot recognises
+   * as supporting HID0.HILE, so we'll manually set it until
+   * the skiboot patch goes in.
+   */
+  OpalStatus = OpalReinitCPUs(OPAL_REINIT_CPUS_HILE_LE);
+  if (OpalStatus != OPAL_SUCCESS) {
+    DEBUG((EFI_D_INFO, "OPAL claims no HILE supported, pretend to know better...\n"));
+    UINT64 HID0 = GET_HID0();
+    SET_HID0(HID0 | HID0_HILE);
+  }
+
+  /*
+   * Force external interrupts to HV mode.
+   */
+  SET_LPCR((GET_LPCR() & ~LPCR_LPES) | LPCR_ILE);
+
+  /*
+   * Allocate the stack we'll use when servicing exceptions
+   * with MSR_RI 0.
+   */
+  Status = gBS->AllocatePages (AllocateAnyPages, EfiBootServicesData,
+                               UNRECOVERABLE_EXCEPTION_STACK_PAGES,
+                               &UnrecStack);
+  ASSERT_EFI_ERROR (Status);
+  PcrGet()->CpuDxeUnrecSP = UnrecStack;
+
+  Vectors = 0;
+  Status = gBS->AllocatePages (AllocateAddress, EfiBootServicesCode,
+                               EFI_SIZE_TO_PAGES((UINTN) &CpuDxeVectorsEnd -
+                                                 (UINTN) &CpuDxeVectorsStart),
+                               &Vectors);
+  ASSERT_EFI_ERROR (Status);
+  CopyMem((void *) Vectors, (VOID *) &CpuDxeVectorsStart,
+          ((UINTN) &CpuDxeVectorsEnd - (UINTN) &CpuDxeVectorsStart));
+
+  /*
+   * Vectors expect HSPRG0 to contain the pointer to KPCR,
+   * HSPRG1 is scratch.
+   */
+  SET_HSPRG0((UINTN) PcrGet());
+
+  /*
+   * Context is now recoverable.
+   */
+  mtmsrd(MSR_RI, 1);
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                 &mCpuHandle,
-                &gEfiCpuArchProtocolGuid,           &mCpu,
+                &gEfiCpuArchProtocolGuid, &mCpu,
                 NULL
                 );
-  ASSERT_EFI_ERROR (Status);
-
-  //
-  // Setup a callback for idle events
-  //
-  Status = gBS->CreateEventEx (
-                  EVT_NOTIFY_SIGNAL,
-                  TPL_NOTIFY,
-                  IdleLoopEventCallback,
-                  NULL,
-                  &gIdleLoopEventGuid,
-                  &IdleLoopEvent
-                  );
   ASSERT_EFI_ERROR (Status);
 
   return Status;

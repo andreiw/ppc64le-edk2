@@ -21,8 +21,17 @@
 ASM_FUNC(_ModuleEntryPoint)
 	LOAD_TOC(r2)
 
+	//
+	// Enter here with:
+	// r3 = FDT
+	// r4 = OPAL base
+	// r5 = OPAL entry
+	//
 	mr	r24, r4
 	mr	r25, r5
+
+	// Turn off MSR_EE and MSR_RI.
+	mtmsrd 0, 1
 
 	//
 	// The FD is followed by the stack, the PCR

@@ -27,6 +27,9 @@
   CpuDxe.c
   CpuDxe.h
 
+[Sources.PPC64]
+  PPC64/Vectors.S
+
 [Packages]
   PPC64Pkg/PPC64Pkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
@@ -42,6 +45,7 @@
   PeCoffGetEntryPointLib
   UefiDriverEntryPoint
   UefiLib
+  OpalLib
 
 [Protocols]
   gEfiCpuArchProtocolGuid
