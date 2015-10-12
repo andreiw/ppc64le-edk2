@@ -54,27 +54,11 @@ SerialPortWrite (
 	UINT8 PrintBuffer[PRINT_BUFFER_SIZE];
 	UINTN SourceIndex      = 0;
 	UINTN DestinationIndex = 0;
-	UINT8 CurrentCharacter;
 	UINTN OpalLen;
 
 	while (SourceIndex < NumberOfBytes)
 	{
-		CurrentCharacter = Buffer[SourceIndex++];
-
-		switch (CurrentCharacter)
-		{
-		case '\r':
-			continue;
-
-		case '\n':
-			PrintBuffer[DestinationIndex++] = ' ';
-			// fall through
-
-		default:
-			PrintBuffer[DestinationIndex++] = CurrentCharacter;
-			break;
-		}
-
+		PrintBuffer[DestinationIndex++] = Buffer[SourceIndex++];
 		if (DestinationIndex > PRINT_BUFFER_THRESHOLD)
 		{
 			PrintBuffer[DestinationIndex] = '\0';
