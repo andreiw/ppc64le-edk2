@@ -114,6 +114,6 @@
  * to the maximum value that doesn't cause an interrupt, which is
  * the value with MSB bit set to 0.
  */
-#define DEC_DISABLE_FOR_A_WHILE 0x7fffffff
+#define DEC_MAX_USABLE 0x7fffffff
 
 #endif // __PPC64_H__

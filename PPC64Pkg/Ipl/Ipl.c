@@ -22,6 +22,7 @@
 #include <Guid/LzmaDecompress.h>
 #include <Guid/FdtHob.h>
 #include <libfdt.h>
+#include <Chipset/PPC64Intrinsics.h>
 #include <Endian.h>
 #include <Pcr.h>
 #include "LzmaDecompress.h"
@@ -58,9 +59,17 @@ Log (
 	SerialPortWrite ((UINT8 *) Buffer, Count);
 }
 
+VOID
+CpuInit (
+	VOID
+	)
+{
+  smt_medium ();
+  hdec_disable ();
+}
 
-UINT64
-InitializeSystemMemory (
+VOID
+ParseFDT (
 	IN VOID *DeviceTreeBase
 	)
 {
@@ -70,6 +79,7 @@ InitializeSystemMemory (
 	CONST CHAR8  *Type;
 	INT32        Len;
 	CONST UINT64 *RegProp;
+	CONST UINT32 *RegProp32;
 
 	NewBase = 0;
 	NewSize = 0;
@@ -109,10 +119,13 @@ InitializeSystemMemory (
 					__FUNCTION__));
 			}
 			break;
+		} else if (Type && AsciiStrnCmp (Type, "cpu", Len) == 0) {
+			RegProp32 = fdt_getprop (DeviceTreeBase, Node,
+						 "timebase-frequency", NULL);
+			PcrGet()->TBFreq = fdt32_to_cpu (ReadUnaligned32 (RegProp32));
+			DEBUG ((EFI_D_INFO, "TB %lu Hz\n", PcrGet()->TBFreq));
 		}
 	}
-
-	return NewSize;
 }
 
 
@@ -232,7 +245,9 @@ CEntryPoint (
 	Log (L"PPC64LE UEFI firmware (version %s built at %a on %a)\n",
 	    (CHAR16*) PcdGetPtr (PcdFirmwareVersionString), __TIME__, __DATE__);
 
-	InitializeSystemMemory ((VOID *) FDTBase);
+	CpuInit ();
+
+	ParseFDT ((VOID *) FDTBase);
 	DEBUG ((EFI_D_INFO, "System RAM @ 0x%lx - 0x%lx\n",
 		PcdGet64 (PcdSystemMemoryBase),
 		PcdGet64 (PcdSystemMemoryBase) +

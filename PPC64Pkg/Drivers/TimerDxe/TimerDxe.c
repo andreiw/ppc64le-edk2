@@ -11,21 +11,28 @@
 //
 
 #include <PiDxe.h>
-
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Chipset/PPC64Intrinsics.h>
 #include <Library/UefiLib.h>
 #include <Library/PcdLib.h>
 #include <Protocol/Timer.h>
+#include <Protocol/Cpu.h>
+#include <Pcr.h>
+
+// CPU architecture protocol, because timer does not go through XICS.
+EFI_CPU_ARCH_PROTOCOL *gCpu;
 
 // The notification function to call on every timer interrupt.
-EFI_TIMER_NOTIFY      mTimerNotifyFunction     = (EFI_TIMER_NOTIFY)NULL;
-EFI_EVENT             EfiExitBootServicesEvent = (EFI_EVENT)NULL;
+EFI_TIMER_NOTIFY      mTimerNotifyFunction     = (EFI_TIMER_NOTIFY) NULL;
+EFI_EVENT             EfiExitBootServicesEvent = (EFI_EVENT) NULL;
 
 // The current period of the timer interrupt
 UINT64 mTimerPeriod = 0;
+// The latest Timer Tick calculated for mTimerPeriod
+UINT64 mTimerTicks = 0;
 
 /**
   This function registers the handler NotifyFunction so it is called every time
@@ -85,6 +92,7 @@ ExitBootServicesEvent (
   IN VOID       *Context
   )
 {
+  hdec_disable ();
 }
 
 /**
@@ -122,10 +130,37 @@ TimerDriverSetTimerPeriod (
   IN UINT64                   TimerPeriod
   )
 {
+  UINT64  TimerTicks;
+  EFI_TPL OriginalTPL;
 
-  // Save the new timer period
-  mTimerPeriod   = TimerPeriod;
-  // Reset the elapsed period
+  // Always disable the timer
+  hdec_disable ();
+
+  if (TimerPeriod != 0) {
+    TimerTicks = MultU64x32 (TimerPeriod, PcrGet()->TBFreq);
+    TimerTicks = DivU64x32 (TimerTicks, 10000000U) - 1;
+
+    // Raise TPL to update the mTimerTicks and mTimerPeriod to ensure these values
+    // are coherent in the interrupt handler
+    OriginalTPL = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+
+    mTimerTicks    = TimerTicks;
+    mTimerPeriod   = TimerPeriod;
+
+    gBS->RestoreTPL (OriginalTPL);
+
+    //
+    // This is unlikely, so no need to implement it now.
+    //
+    ASSERT(mTimerTicks <= DEC_MAX_USABLE);
+    SET_HDEC(mTimerTicks);
+
+    // Enable the timer
+    hdec_enable ();
+  } else {
+    // Save the new timer period
+    mTimerPeriod = TimerPeriod;
+  }
 
   return EFI_SUCCESS;
 }
@@ -225,6 +260,47 @@ EFI_TIMER_ARCH_PROTOCOL   gTimer = {
   TimerDriverGenerateSoftInterrupt
 };
 
+/**
+
+  C Interrupt Handler called in the interrupt context on timer event
+
+
+  @param InterruptType  Local decrementer exception vector.
+
+  @param SystemContext  Pointer to system register context. Mostly used by debuggers and will
+                        update the system context after the return from the interrupt if
+                        modified. Don't change these values unless you know what you are doing
+
+**/
+VOID
+EFIAPI
+TimerInterruptHandler (
+  IN  EFI_EXCEPTION_TYPE InterruptType,
+  IN  EFI_SYSTEM_CONTEXT SystemContext
+  )
+{
+  EFI_TPL OriginalTPL;
+
+  //
+  // DXE core uses this callback for the EFI timer tick. The DXE core uses locks
+  // that raise to TPL_HIGH and then restore back to current level. Thus we need
+  // to make sure TPL level is set to TPL_HIGH while we are handling the timer tick.
+  //
+  OriginalTPL = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+
+  if (mTimerNotifyFunction) {
+    mTimerNotifyFunction (mTimerPeriod);
+  }
+
+  SET_HDEC(mTimerTicks);
+
+  //
+  // Reload the Timer
+  //
+
+  gBS->RestoreTPL (OriginalTPL);
+}
+
 
 /**
   Initialize the state information for the Timer Architectural Protocol and
@@ -249,17 +325,32 @@ TimerInitialize (
   EFI_HANDLE  Handle = NULL;
   EFI_STATUS  Status;
 
+  // Find the CPU architecture protocol.  ASSERT if not found.
+  Status = gBS->LocateProtocol (&gEfiCpuArchProtocolGuid, NULL,
+                                (VOID **)&gCpu);
+  ASSERT_EFI_ERROR (Status);
+
+  // Disable the timer
+  hdec_disable ();
+
+  // Install the handler.
+  Status = gCpu->RegisterInterruptHandler (gCpu, EXCEPT_PPC64_HDEC,
+                                           TimerInterruptHandler);
+  ASSERT_EFI_ERROR (Status);
+
   // Set up default timer
   Status = TimerDriverSetTimerPeriod (&gTimer, FixedPcdGet32(PcdTimerPeriod)); // TIMER_DEFAULT_PERIOD
   ASSERT_EFI_ERROR (Status);
 
   // Install the Timer Architectural Protocol onto a new handle
-  Status = gBS->InstallMultipleProtocolInterfaces(
+  Status = gBS->InstallMultipleProtocolInterfaces (
                   &Handle,
-                  &gEfiTimerArchProtocolGuid,      &gTimer,
+                  &gEfiTimerArchProtocolGuid, &gTimer,
                   NULL
                   );
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
+
+  hdec_enable ();
 
   // Register for an ExitBootServicesEvent
   Status = gBS->CreateEvent (EVT_SIGNAL_EXIT_BOOT_SERVICES, TPL_NOTIFY, ExitBootServicesEvent, NULL, &EfiExitBootServicesEvent);

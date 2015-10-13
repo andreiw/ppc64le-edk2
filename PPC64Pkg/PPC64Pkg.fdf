@@ -95,6 +95,7 @@ READ_LOCK_STATUS   = TRUE
   # DXE.
   #
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
+  INF MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
 
   #
   # Architectural protocols.
@@ -126,6 +127,7 @@ READ_LOCK_STATUS   = TRUE
   #
   # UEFI application (Shell Embedded Boot Loader)
   #
+  INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   INF ShellPkg/Application/Shell/Shell.inf
 
 ################################################################################

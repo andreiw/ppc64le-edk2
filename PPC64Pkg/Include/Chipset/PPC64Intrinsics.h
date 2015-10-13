@@ -54,6 +54,14 @@ REG_READ_FN(DSISR)
 #undef __S
 
 static inline UINT64
+mftb(void)
+{
+  UINT64 tb;
+  asm volatile("mftb %0" : "=r"(tb) : : "memory");
+  return tb;
+}
+
+static inline UINT64
 mfmsr(void)
 {
   UINT64 val;
@@ -70,8 +78,27 @@ mtmsr(UINT64 val)
 }
 
 static inline void  __attribute__((always_inline))
-mtmsrd(UINT64 val, const int l)
+mtmsrd(UINT64 val, const UINTN l)
 {
   asm volatile("mtmsrd %0,%1" : : "r"(val), "i"(l) : "memory");
 }
+
+static inline VOID
+smt_medium(VOID)
+{
+  asm volatile("or 2, 2, 2");
+}
+
+static inline VOID
+hdec_enable(VOID)
+{
+  SET_LPCR(GET_LPCR() | LPCR_HDICE);
+}
+
+static inline VOID
+hdec_disable(VOID)
+{
+  SET_LPCR(GET_LPCR() & ~LPCR_HDICE);
+}
+
 #endif // __PPC64_INTRINSICSH__

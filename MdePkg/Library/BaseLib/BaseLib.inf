@@ -505,6 +505,7 @@
    PPC64/SwitchStack.S
    PPC64/CpuBreakpoint.S
    PPC64/SetJump.S
+   PPC64/CpuPause.S
    Unaligned.c
    Math64.c
 
