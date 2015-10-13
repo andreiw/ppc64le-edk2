@@ -242,7 +242,7 @@ CEntryPoint (
 
 	SerialPortInitialize ();
 
-	Log (L"PPC64LE UEFI firmware (version %s built at %a on %a)\n",
+	Log (L"PPC64LE UEFI firmware (%s built at %a on %a)\n",
 	    (CHAR16*) PcdGetPtr (PcdFirmwareVersionString), __TIME__, __DATE__);
 
 	CpuInit ();

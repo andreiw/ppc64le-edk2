@@ -66,6 +66,7 @@
   gShellLevel3HiiGuid                                     ## SOMETIMES_CONSUMES ## HII
 
 [Pcd.common]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
   gEfiShellPkgTokenSpaceGuid.PcdShellSupportLevel         ## CONSUMES
   gEfiShellPkgTokenSpaceGuid.PcdShellFileOperationSize    ## SOMETIMES_CONSUMES
   gEfiShellPkgTokenSpaceGuid.PcdShellSupplier             ## SOMETIMES_CONSUMES

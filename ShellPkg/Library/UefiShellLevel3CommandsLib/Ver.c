@@ -22,6 +22,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-terse", TypeFlag},
   {L"-t", TypeFlag},
   {L"-_pa", TypeFlag},
+  {L"-_fv", TypeFlag},
   {NULL, TypeMax}
   };
 
@@ -133,6 +134,13 @@ ShellCommandRunVer (
       //
       if (ShellCommandLineGetFlag(Package, L"-_pa")) {
         ShellPrintEx(-1, -1, L"%d\r\n", sizeof(UINTN)==sizeof(UINT64)?64:32);
+      }
+
+      //
+      // implementation specific support for displaying processor architecture
+      //
+      if (ShellCommandLineGetFlag(Package, L"-_fv")) {
+        ShellPrintEx(-1, -1, L"%s\r\n", (CHAR16 *) PcdGetPtr (PcdFirmwareVersionString));
       }
     }
 
