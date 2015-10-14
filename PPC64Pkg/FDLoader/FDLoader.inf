@@ -47,6 +47,7 @@
 
 [Pcd]
   gPPC64TokenSpaceGuid.PcdFdBaseAddress
+  gPPC64TokenSpaceGuid.PcdFvBaseAddress
   gPPC64TokenSpaceGuid.PcdFdSize
 
 [BuildOptions]

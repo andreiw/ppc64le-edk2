@@ -13,6 +13,9 @@
 #include <AsmMacroLib.h>
 #include <Library/PcdLib.h>
 
+#define FV_OFFSET (FixedPcdGet64(PcdFvBaseAddress) - \
+                   FixedPcdGet64(PcdFdBaseAddress))
+
 ASM_FUNC(_ModuleEntryPoint)
         /*
          * With credit to the Teensy ELF tutorial.
@@ -66,7 +69,7 @@ code:   tdi   0, 0, 0x48; /* Reverse endian of b . + 8          */
          */
 1:      bl   2f
 2:      mflr r1
-        addi r1, r1, (16 * 1024) - (2b - start)
+        addi r1, r1, (FV_OFFSET) - (2b - start)
         ld   r1, 0(r1)
         ld   r1, 0(r1)    /* Remove when we switch to ABIv2 */
         mtlr r1
