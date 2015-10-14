@@ -11,12 +11,42 @@
 //
 
 #include <AsmMacroLib.h>
+#include <Library/PcdLib.h>
 
 ASM_FUNC(_ModuleEntryPoint)
         /*
+         * With credit to the Teensy ELF tutorial.
+         *
+         * Who needs linkers anyway?
+         */
+start:  .byte 0x7F, 'E', 'L', 'F', 2, 1, 1, 0  /* e_ident */
+        .byte 0, 0, 0, 0, 0, 0, 0, 0
+        .word 2                                /* e_type */
+        .word 21                               /* e_machine */
+        .long 1                                /* e_version */
+        .quad FixedPcdGet64(PcdFdBaseAddress) + code - start /* e_entry */
+        .quad phdr - start                     /* e_phoff */
+        .quad 0                                /* e_shoff */
+        .long 0                                /* e_flags */
+        .word phdr - start                     /* e_ehsize */
+        .word code - phdr                      /* e_phentsize */
+        .word 1                                /* e_phnum */
+        .word 0                                /* e_shentsize */
+        .word 0                                /* e_shnum */
+        .word 0                                /* e_shstrndx */
+phdr:   .long 1                                /* e_ptype */
+        .long 5                                /* p_flags */
+        .quad 0                                /* p_offset */
+        .quad FixedPcdGet64(PcdFdBaseAddress)  /* p_vaddr */
+        .quad FixedPcdGet64(PcdFdBaseAddress)  /* p_paddr */
+        .quad FixedPcdGet32(PcdFdSize)         /* p_filesz */
+        .quad FixedPcdGet32(PcdFdSize)         /* p_memsz */
+        .quad 0x1000                           /* P_align */
+
+        /*
          * If we're not in LE, let's switch.
          */
-0:      tdi   0, 0, 0x48; /* Reverse endian of b . + 8          */
+code:   tdi   0, 0, 0x48; /* Reverse endian of b . + 8          */
         b     $+36;       /* Skip trampoline if endian is good  */
         .long 0x05009f42; /* bcl 20,31,$+4                      */
         .long 0xa602487d; /* mflr r10                           */
@@ -36,7 +66,7 @@ ASM_FUNC(_ModuleEntryPoint)
          */
 1:      bl   2f
 2:      mflr r1
-        addi r1, r1, (16 * 1024) - (2b - 0b)
+        addi r1, r1, (16 * 1024) - (2b - start)
         ld   r1, 0(r1)
         ld   r1, 0(r1)    /* Remove when we switch to ABIv2 */
         mtlr r1

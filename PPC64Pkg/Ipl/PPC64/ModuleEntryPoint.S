@@ -24,11 +24,9 @@ ASM_FUNC(_ModuleEntryPoint)
 	//
 	// Enter here with:
 	// r3 = FDT
-	// r4 = OPAL base
-	// r5 = OPAL entry
+	// r8 = OPAL base
+	// r9 = OPAL entry
 	//
-	mr	r24, r4
-	mr	r25, r5
 
 	// Turn off MSR_EE and MSR_RI.
 	mtmsrd 0, 1
@@ -48,8 +46,8 @@ ASM_FUNC(_ModuleEntryPoint)
 	LOAD_IMM64(r7, FixedPcdGet32(PcdIplRAMRegionSize))
 	add	r7, r6, r7
 
-	std	r24, PCR(OPALBase)
-	std	r25, PCR(OPALEntry)
+	std	r8, PCR(OPALBase)
+	std	r9, PCR(OPALEntry)
 
 	//
 	// Go C: r3 = FDT

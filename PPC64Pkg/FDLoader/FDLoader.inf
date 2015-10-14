@@ -46,6 +46,8 @@
 [FixedPcd]
 
 [Pcd]
+  gPPC64TokenSpaceGuid.PcdFdBaseAddress
+  gPPC64TokenSpaceGuid.PcdFdSize
 
 [BuildOptions]
   GCC:*_*_*_GENFW_FLAGS = --exe2bin

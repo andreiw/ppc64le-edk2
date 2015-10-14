@@ -25,7 +25,7 @@
 ################################################################################
 
 [FD.POWERNV]
-BaseAddress   = 0x40000000|gPPC64TokenSpaceGuid.PcdFdBaseAddress
+BaseAddress   = 0x20000000|gPPC64TokenSpaceGuid.PcdFdBaseAddress
 Size          = 0x00500000|gPPC64TokenSpaceGuid.PcdFdSize
 ErasePolarity = 1
 

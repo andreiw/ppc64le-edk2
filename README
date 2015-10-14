@@ -72,55 +72,47 @@ You will need Skiboot and Benjamin Herrenschmidt's PowerNV QEMU tree.
 Good directions for both QEMU/PowerNV and Skiboot:
 https://www.flamingspork.com/blog/2015/08/28/running-opal-in-qemu-the-powernv-platform/
 
-Until I fix the toolchain to create a self-booting UEFI FD, you will
-also need http://github.com/andreiw/ppc64le_hello as a loader. See README
-for building instructions.
-
 After that, assuming skiboot.lid is in current working directory,
-$ qemu-system-ppc64 -m 4G -M powernv -kernel ppc64le_hello -nographic -initrd ~/src/edk2/Build/PPC64/DEBUG_GCC49/FV/POWERNV.fd
+$ qemu-system-ppc64 -m 4G -M powernv -nographic -kernel ~/src/edk2/Build/PPC64/DEBUG_GCC49/FV/POWERNV.fd
 
-You shall see some spew from Skiboot followed by a menu printed by
-ppc64le_hello. Press 'I' at the menu since we want to run the FD image
-passed as initrd. You should now see:
+You should see skiboot messages, followed by something like:
 
-initrd is 0x40000000-0x40500000
-ABIv1
-calling 0x40001008
-PPC64LE UEFI firmware (PPC64LE Prototype built at 23:14:36 on Oct 13 2015)
+[1224294270,5] INIT: Starting kernel at 0x20000078, fdt at 0x30350798 (size 0x2d21)
+PPC64LE UEFI firmware (PPC64LE Prototype built at 02:45:10 on Oct 14 2015)
 TB 512000000 Hz
 System RAM @ 0x0 - 0xFFFFFFFF
-Ipl total @ 0x40000000-0x40911000
-Ipl used  @ 0x40000000-0x40511000
-Stack     @ 0x40500000-0x40510000
-Ipl free  @ 0x40511000-0x40911000
-FDT @ 0x4090E000-0x40910D21
+Ipl total @ 0x20000000-0x20911000
+Ipl used  @ 0x20000000-0x20511000
+Stack     @ 0x20500000-0x20510000
+Ipl free  @ 0x20511000-0x20911000
+FDT @ 0x2090E000-0x20910D21
 /memreserve/ [0x31C00000-0x31C20000) -> RT
 /memreserve/ [0x31000000-0x31C00000) -> RT
 /memreserve/ [0x30300000-0x31000000) -> RT
 /memreserve/ [0x30000000-0x30300000) -> RT
 /memreserve/ [0x39C00000-0x39DC1000) -> RT
-Loading DxeCore at 0x00408CA000 EntryPoint=0x0040908460
+Loading DxeCore at 0x00208CA000 EntryPoint=0x0020908460
 CoreInitializeMemoryServices:
-  BaseAddress - 0x40512000 Length - 0x3B8000 MinimalMemorySizeNeeded - 0x10000
-  InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 40907418
+  BaseAddress - 0x20512000 Length - 0x3B8000 MinimalMemorySizeNeeded - 0x10000
+  InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 20907418
   HOBLIST address in DXE = 0xFFFFF018
-  Memory Allocation 0x00000004 0x40000000 - 0x40510FFF
+  Memory Allocation 0x00000004 0x20000000 - 0x20510FFF
   Memory Allocation 0x00000003 0x0 - 0x1FFF
-  Memory Allocation 0x00000004 0x4090E000 - 0x40910FFF
+  Memory Allocation 0x00000004 0x2090E000 - 0x20910FFF
   Memory Allocation 0x00000006 0x31C00000 - 0x31C1FFFF
   Memory Allocation 0x00000006 0x31000000 - 0x31BFFFFF
   Memory Allocation 0x00000006 0x30300000 - 0x30FFFFFF
   Memory Allocation 0x00000006 0x30000000 - 0x302FFFFF
   Memory Allocation 0x00000006 0x39C00000 - 0x39DC0FFF
-  Memory Allocation 0x00000004 0x40500000 - 0x4050FFFF
-  Memory Allocation 0x00000004 0x408CA000 - 0x4090DFFF
-  Memory Allocation 0x00000003 0x408CA000 - 0x4090DFFF
-  FV Hob            0x40000000 - 0x404FFFFF
-  InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 409073A8
+  Memory Allocation 0x00000004 0x20500000 - 0x2050FFFF
+  Memory Allocation 0x00000004 0x208CA000 - 0x2090DFFF
+  Memory Allocation 0x00000003 0x208CA000 - 0x2090DFFF
+  FV Hob            0x20004000 - 0x204FFFFF
+  InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 209073A8
   InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 FFFFB530
   InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B FFFFB7D8
   InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A FFFF69B0
-  InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 409073C8
+  InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 209073C8
   Loading driver 80CF7257-87AB-47F9-A3FE-D50B76D89541
   InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B FFE8F280
   Loading driver at 0x000FFE0B000 EntryPoint=0x000FFE191E8 PcdDxe.efi
@@ -133,7 +125,7 @@ CoreInitializeMemoryServices:
   InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B FFE2D280
   Loading driver at 0x000FFE01000 EntryPoint=0x000FFE09068 PPC64CpuDxe.efi
   InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF FFE2D6D8
-  [1520645983,3] OPAL: Trying a CPU re-init with flags: 0x2
+  [1298517048,3] OPAL: Trying a CPU re-init with flags: 0x2
   InstallProtocolInterface: 26BACCB1-6F42-11D4-BCE7-0080C73C8881 FFE09008
   Loading driver B601F8C4-43B7-4784-95B1-F4226CB40CEE
   InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B FFE2C180
@@ -265,6 +257,7 @@ CoreInitializeMemoryServices:
   Terminal - Mode 0, Column = 80, Row = 25
   Terminal - Mode 1, Column = 80, Row = 50
   Terminal - Mode 2, Column = 100, Row = 31
+  ...
   UEFI Interactive Shell v2.187477C2-69C7-11D2-8E39-00A0C969723B FFC61720
   EDK IIlProtocolInterface: 752F3136-4E16-4FDC-A22A-E5F46812F4CA FFC67C58
   UEFI v2.50 (EDK II, 0x00010000)008-7F9B-4F30-87AC-60C9FEF5DA4E FF8EE168
