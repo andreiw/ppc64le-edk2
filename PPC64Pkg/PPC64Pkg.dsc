@@ -168,6 +168,11 @@
 
 [Components.common]
   #
+  # The blob used to make the FD loadable by skiboot automagically, eventually.
+  #
+  PPC64Pkg/FDLoader/FDLoader.inf
+
+  #
   # IPL ("SEC").
   #
   PPC64Pkg/Ipl/Ipl.inf

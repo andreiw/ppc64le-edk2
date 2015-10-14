@@ -209,8 +209,10 @@ ConvertElf (
   //
   // Write debug info.
   //
-  VerboseMsg ("Write debug info.");
-  ElfFunctions.WriteDebug ();
+  if (mOutImageType != FW_BIN_IMAGE) {
+    VerboseMsg ("Write debug info.");
+    ElfFunctions.WriteDebug ();
+  }
 
   //
   // Make sure image size is correct before returning the new image.
