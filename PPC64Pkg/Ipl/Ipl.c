@@ -64,8 +64,11 @@ CpuInit (
 	VOID
 	)
 {
-  smt_medium ();
-  hdec_disable ();
+	smt_medium ();
+	hdec_disable ();
+
+	PcrGet()->PhysVectorsBase = 0;
+	PcrGet()->PhysVectorsSize = 0x2000;
 }
 
 VOID
@@ -138,8 +141,6 @@ BuildMemoryHobs (
 {
 	UINTN Index;
 	UINTN NumResv;
-	EFI_PHYSICAL_ADDRESS StartReserved = -1;
-	EFI_PHYSICAL_ADDRESS EndReserved = 0;
 	EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttributes;
 
 	ResourceAttributes = (
@@ -152,13 +153,15 @@ BuildMemoryHobs (
 		EFI_RESOURCE_ATTRIBUTE_TESTED
 		);
 
+	BuildResourceDescriptorHob (
+		EFI_RESOURCE_SYSTEM_MEMORY,
+		ResourceAttributes,
+		UefiMemoryBase,
+		UefiMemorySize
+		);
+
 	NumResv = fdt_num_mem_rsv(FDT);
 
-	/*
-	 * These ranges don't have to be sorted and aren't.
-	 * For now do the saddest thing ever and just skip
-	 * the entire block. Will have to revisit this again...
-	 */
 	for (Index = 0; Index < NumResv; Index++) {
 		UINT64 Size;
 		EFI_PHYSICAL_ADDRESS Addr;
@@ -166,40 +169,11 @@ BuildMemoryHobs (
 			break;
 		}
 
-		DEBUG((EFI_D_INFO, "/memreserve/ 0x%lx 0x%lx;\n",
-		       Addr, Size));
-
-		if (Addr < StartReserved) {
-			StartReserved = Addr;
-		}
-
-		if (Addr + Size > EndReserved) {
-			EndReserved = Addr + Size;
-		}
-	}
-
-	if (StartReserved < EndReserved) {
-		DEBUG((EFI_D_INFO, "FIXME: Going to skip all 0x%lx-0x%lx\n",
-		       StartReserved, EndReserved));
-		BuildResourceDescriptorHob (
-			EFI_RESOURCE_SYSTEM_MEMORY,
-			ResourceAttributes,
-			UefiMemoryBase,
-			StartReserved - UefiMemoryBase
-			);
-		BuildResourceDescriptorHob (
-			EFI_RESOURCE_SYSTEM_MEMORY,
-			ResourceAttributes,
-			EndReserved,
-			(UefiMemoryBase + UefiMemorySize) - EndReserved
-			);
-	} else {
-		BuildResourceDescriptorHob (
-			EFI_RESOURCE_SYSTEM_MEMORY,
-			ResourceAttributes,
-			UefiMemoryBase,
-			UefiMemorySize
-			);
+		Size = ALIGN_VALUE(Size, EFI_PAGE_SIZE);
+		DEBUG((EFI_D_INFO, "/memreserve/ [0x%lx-0x%lx) -> RT\n",
+		       Addr, Addr + Size));
+		BuildMemoryAllocationHob (Addr,Size,
+					  EfiRuntimeServicesData);
 	}
 }
 
@@ -231,7 +205,7 @@ BuildFdtHob(
 VOID
 CEntryPoint (
 	IN EFI_PHYSICAL_ADDRESS FDTBase,
-	IN EFI_PHYSICAL_ADDRESS IplMemoryBottom,
+	IN EFI_PHYSICAL_ADDRESS IplReservedBottom,
 	IN EFI_PHYSICAL_ADDRESS StackBase,
 	IN EFI_PHYSICAL_ADDRESS IplFreeMemoryBottom,
 	IN EFI_PHYSICAL_ADDRESS IplMemoryTop
@@ -254,9 +228,9 @@ CEntryPoint (
 		PcdGet64 (PcdSystemMemorySize) - 1));
 
 	DEBUG((EFI_D_INFO, "Ipl total @ 0x%lx-0x%lx\n",
-	       IplMemoryBottom, IplMemoryTop));
+	       IplReservedBottom, IplMemoryTop));
 	DEBUG((EFI_D_INFO, "Ipl used  @ 0x%lx-0x%lx\n",
-	       IplMemoryBottom, IplFreeMemoryBottom));
+	       IplReservedBottom, IplFreeMemoryBottom));
 	DEBUG((EFI_D_INFO, "Stack     @ 0x%lx-0x%lx\n",
 	       StackBase, StackBase +
 	       PcdGet32 (PcdCPUCorePrimaryStackSize)));
@@ -264,26 +238,49 @@ CEntryPoint (
 	       IplFreeMemoryBottom, IplMemoryTop));
 
 	/*
-	 * Everything bween IplFreeMemoryBottom and IplMemoryTop.
-	 *
-	 * [IplMemoryBottom, IplFreeMemoryBottom) is
-	 * RAM reserved for FD, stack and PCR.
+	 * Claim PHIT memory entire system RAM range:
+	 * this lets us use BuildMemoryAllocationHob
+	 * to cover reserved allocations.
 	 */
 	HobList = HobConstructor (
-		(VOID *) IplMemoryBottom,
-		IplMemoryTop - IplMemoryBottom,
+		(VOID *) 0,
+		PcdGet64 (PcdSystemMemoryBase) +
+		PcdGet64 (PcdSystemMemorySize),
 		(VOID *) IplFreeMemoryBottom,
 		(VOID *) IplMemoryTop);
 	PrePeiSetHobList (HobList);
-	BuildMemoryAllocationHob (IplMemoryBottom,
-				  IplFreeMemoryBottom - IplMemoryBottom,
+
+	/*
+	 * [IplReservedBottom, IplFreeMemoryBottom) is
+	 * RAM reserved for FD, stack and PCR.
+	 */
+	BuildMemoryAllocationHob (IplReservedBottom,
+				  IplFreeMemoryBottom - IplReservedBottom,
 				  EfiBootServicesData);
 
+	/*
+	 * Reserve CPU vectors space.
+	 */
+	BuildMemoryAllocationHob (PcrGet()->PhysVectorsBase,
+				  PcrGet()->PhysVectorsSize,
+				  EfiBootServicesCode);
+
+	/*
+	 * Copy and reserve FDT.
+	 */
 	BuildFdtHob((VOID *) FDTBase);
+
+	/*
+	 * Describe system RAM and reserved OPAL ranges from FDT.
+	 */
 	BuildMemoryHobs ((VOID *) FDTBase, PcdGet64 (PcdSystemMemoryBase),
 			 PcdGet64 (PcdSystemMemorySize));
 
+	/*
+	 * DXE stack (which is our stack as well before we transfer control).
+	 */
 	BuildStackHob (StackBase, PcdGet32 (PcdCPUCorePrimaryStackSize));
+
 	BuildCpuHob (PcdGet8 (PcdPrePiCpuMemorySize), PcdGet8 (PcdPrePiCpuIoSize));
 	SetBootMode (BOOT_WITH_FULL_CONFIGURATION);
 	BuildFvHob (PcdGet64 (PcdFvBaseAddress), PcdGet32 (PcdFvSize));

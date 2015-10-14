@@ -53,7 +53,7 @@ ASM_FUNC(_ModuleEntryPoint)
 
 	//
 	// Go C: r3 = FDT
-	//       r4 = IplMemoryBottom
+	//       r4 = IplReservedBottom
 	//       r5 = Stack base
 	//       r6 = IplFreeMemoryBottom
 	//       r7 = IplMemoryTop

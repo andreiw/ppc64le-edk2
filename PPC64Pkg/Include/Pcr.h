@@ -20,6 +20,9 @@ typedef struct _PCR {
 	UINT64 CpuDxeUnrecSP;
 	UINT64 CpuDxeTOC;
 	UINT64 TBFreq;
+	UINT64 PhysVectorsBase;
+	UINT64 PhysVectorsSize;
+
 } PCR;
 
 STATIC inline PCR *
@@ -34,6 +37,8 @@ PcrGet(void)
 #define PCR_CpuDxeUnrecSP           16
 #define PCR_CpuDxeTOC               24
 #define PCR_TBFreq                  32
+#define PCR_PhysVectorsBase         40
+#define PCR_PhysVectorsSize         48
 #define PCR_Size                0x1000
 #define PCR_R(name, reg) (PCR_ ## name)(reg)
 #define PCR(name) PCR_R(name, r13)

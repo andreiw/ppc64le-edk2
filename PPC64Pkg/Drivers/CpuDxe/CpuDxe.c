@@ -290,7 +290,6 @@ CpuDxeInitialize (
   EFI_PHYSICAL_ADDRESS Vectors;
 
   PcrGet()->CpuDxeTOC = CpuDxeMyTOC();
-  DEBUG((EFI_D_ERROR, "My TOC is at 0x%lx\n", PcrGet()->CpuDxeTOC));
 
   /*
    * MSR.ILE controls supervisor exception endianness. OPAL
@@ -322,12 +321,10 @@ CpuDxeInitialize (
   ASSERT_EFI_ERROR (Status);
   PcrGet()->CpuDxeUnrecSP = UnrecStack;
 
-  Vectors = 0;
-  Status = gBS->AllocatePages (AllocateAddress, EfiBootServicesCode,
-                               EFI_SIZE_TO_PAGES((UINTN) &CpuDxeVectorsEnd -
-                                                 (UINTN) &CpuDxeVectorsStart),
-                               &Vectors);
-  ASSERT_EFI_ERROR (Status);
+  Vectors = PcrGet()->PhysVectorsBase;
+  ASSERT((UINTN) &CpuDxeVectorsEnd -
+         (UINTN) &CpuDxeVectorsStart <= PcrGet()->PhysVectorsSize);
+
   CopyMem((void *) Vectors, (VOID *) &CpuDxeVectorsStart,
           ((UINTN) &CpuDxeVectorsEnd - (UINTN) &CpuDxeVectorsStart));
 
