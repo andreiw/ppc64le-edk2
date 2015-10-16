@@ -229,6 +229,10 @@ IsTextShdr (
   Elf_Shdr *Shdr
   )
 {
+  if (Shdr->sh_type == SHT_RELA || Shdr->sh_type == SHT_REL) {
+    return FALSE;
+  }
+
   return (BOOLEAN) ((Shdr->sh_flags & (SHF_WRITE | SHF_ALLOC)) == SHF_ALLOC);
 }
 
@@ -249,6 +253,10 @@ IsDataShdr (
   Elf_Shdr *Shdr
   )
 {
+  if (Shdr->sh_type == SHT_RELA || Shdr->sh_type == SHT_REL) {
+    return FALSE;
+  }
+
   if (IsHiiRsrcShdr(Shdr)) {
     return FALSE;
   }
@@ -570,14 +578,48 @@ ScanSections64 (
 }
 
 STATIC
+Elf32_Word
+RelShInfo(Elf_Rela *Rel)
+{
+  UINTN Index;
+  Elf_Shdr *Shdr;
+
+  for (Index = 0; Index < mEhdr->e_shnum; Index++) {
+    Shdr = GetShdrByIndex(Index);
+
+    if (Rel->r_offset >= Shdr->sh_addr &&
+        Rel->r_offset < (Shdr->sh_addr + Shdr->sh_size)) {
+      return Index;
+    }
+  }
+
+  return 0;
+}
+
+STATIC
+BOOLEAN
+RelMatchesShdr(Elf_Rela *Rel,
+               Elf_Shdr *Shdr)
+{
+  if (Shdr == NULL) {
+    return FALSE;
+  }
+
+  if (Rel->r_offset >= Shdr->sh_addr &&
+      Rel->r_offset < (Shdr->sh_addr + Shdr->sh_size)) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+STATIC
 BOOLEAN
 WriteSections64 (
   SECTION_FILTER_TYPES  FilterType
   )
 {
   UINT32      Idx;
-  Elf_Shdr    *SecShdr;
-  UINT32      SecOffset;
   BOOLEAN     (*Filter)(Elf_Shdr *);
 
   //
@@ -630,6 +672,11 @@ WriteSections64 (
   //
   VerboseMsg ("Applying Relocations...");
   for (Idx = 0; Idx < mEhdr->e_shnum; Idx++) {
+    Elf32_Word ShInfo;
+    UINT32     SecOffset;
+    Elf_Shdr   *SecShdr = NULL;
+
+
     //
     // Determine if this is a relocation section.
     //
@@ -639,16 +686,9 @@ WriteSections64 (
     }
 
     //
-    // Relocation section found.  Now extract section information that the relocations
-    // apply to in the ELF data and the new COFF data.
-    //
-    SecShdr = GetShdrByIndex(RelShdr->sh_info);
-    SecOffset = mCoffSectionsOffset[RelShdr->sh_info];
-
-    //
     // Only process relocations for the current filter type.
     //
-    if (RelShdr->sh_type == SHT_RELA && (*Filter)(SecShdr)) {
+    if (RelShdr->sh_type == SHT_RELA) {
       UINT64 RelIdx;
 
       //
@@ -661,7 +701,6 @@ WriteSections64 (
       // Process all relocation entries for this section.
       //
       for (RelIdx = 0; RelIdx < RelShdr->sh_size; RelIdx += (UINT32) RelShdr->sh_entsize) {
-
         //
         // Set pointer to relocation entry
         //
@@ -674,6 +713,29 @@ WriteSections64 (
 
         Elf_Shdr *SymShdr;
         UINT8    *Targ;
+
+        //
+        // Now extract section information that the relocations
+        // apply to in the ELF data and the new COFF data.
+        //
+        if (!RelMatchesShdr(Rel, SecShdr)) {
+          if (RelShdr->sh_info == 0) {
+            ShInfo = RelShInfo(Rel);
+          }
+
+          if (ShInfo == 0) {
+            Error (NULL, 0, 3000, "Invalid",
+                   "unknown relocation for %s+0x%x",
+                   mInImageName, Rel->r_offset);
+          }
+
+          SecShdr = GetShdrByIndex(ShInfo);
+          SecOffset = mCoffSectionsOffset[ShInfo];
+        }
+
+        if (!(*Filter)(SecShdr)) {
+          continue;
+        }
 
         //
         // Check section header index found in symbol table and get the section
@@ -817,6 +879,7 @@ WriteSections64 (
           }
         } else if (mEhdr->e_machine == EM_PPC64) {
           switch (ELF_R_TYPE(Rel->r_info)) {
+          case R_PPC64_RELATIVE:
           case R_PPC64_ADDR64:
           case R_PPC64_TOC:
             *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
@@ -862,12 +925,24 @@ WriteRelocations64 (
   for (Index = 0; Index < mEhdr->e_shnum; Index++) {
     Elf_Shdr *RelShdr = GetShdrByIndex(Index);
     if ((RelShdr->sh_type == SHT_REL) || (RelShdr->sh_type == SHT_RELA)) {
-      Elf_Shdr *SecShdr = GetShdrByIndex (RelShdr->sh_info);
-      if (IsTextShdr(SecShdr) || IsDataShdr(SecShdr)) {
+      Elf32_Word ShInfo = RelShdr->sh_info;
+      Elf_Shdr *SecShdr = ShInfo ? GetShdrByIndex (ShInfo) : NULL;
+      if (SecShdr == NULL || IsTextShdr(SecShdr) || IsDataShdr(SecShdr)) {
         UINT64 RelIdx;
 
         for (RelIdx = 0; RelIdx < RelShdr->sh_size; RelIdx += RelShdr->sh_entsize) {
           Elf_Rela *Rel = (Elf_Rela *)((UINT8*)mEhdr + RelShdr->sh_offset + RelIdx);
+
+          if (!RelMatchesShdr(Rel, SecShdr)) {
+            ShInfo = RelShInfo(Rel);
+            if (ShInfo == 0) {
+              Error (NULL, 0, 3000, "Invalid",
+                     "unknown relocation for %s+0x%x",
+                     mInImageName, Rel->r_offset);
+            }
+
+            SecShdr = GetShdrByIndex(ShInfo);
+          }
 
           if (mEhdr->e_machine == EM_X86_64) {
             switch (ELF_R_TYPE(Rel->r_info)) {
@@ -876,18 +951,18 @@ WriteRelocations64 (
               break;
             case R_X86_64_64:
               VerboseMsg ("EFI_IMAGE_REL_BASED_DIR64 Offset: 0x%08X", 
-                mCoffSectionsOffset[RelShdr->sh_info] + (Rel->r_offset - SecShdr->sh_addr));
+                mCoffSectionsOffset[ShInfo] + (Rel->r_offset - SecShdr->sh_addr));
               CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
                 EFI_IMAGE_REL_BASED_DIR64);
               break;
             case R_X86_64_32S:
             case R_X86_64_32:
               VerboseMsg ("EFI_IMAGE_REL_BASED_HIGHLOW Offset: 0x%08X", 
-                mCoffSectionsOffset[RelShdr->sh_info] + (Rel->r_offset - SecShdr->sh_addr));
+                mCoffSectionsOffset[ShInfo] + (Rel->r_offset - SecShdr->sh_addr));
               CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
                 EFI_IMAGE_REL_BASED_HIGHLOW);
               break;
@@ -923,14 +998,14 @@ WriteRelocations64 (
 
             case R_AARCH64_ABS64:
               CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
                 EFI_IMAGE_REL_BASED_DIR64);
               break;
 
             case R_AARCH64_ABS32:
               CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
                 EFI_IMAGE_REL_BASED_HIGHLOW);
              break;
@@ -940,10 +1015,11 @@ WriteRelocations64 (
             }
           } else if (mEhdr->e_machine == EM_PPC64) {
             switch (ELF_R_TYPE(Rel->r_info)) {
+            case R_PPC_RELATIVE:
             case R_PPC64_ADDR64:
             case R_PPC64_TOC:
               CoffAddFixup(
-                (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
+                (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
                 EFI_IMAGE_REL_BASED_DIR64);
               break;

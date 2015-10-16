@@ -897,6 +897,7 @@ typedef struct {
 #define	R_PPC_SECTOFF_HI	35
 #define	R_PPC_SECTOFF_HA	36
 
+#define	R_PPC64_RELATIVE	22
 #define	R_PPC64_ADDR64		38
 #define	R_PPC64_TOC		51
 #define	R_PPC64_UADDR32		R_PPC_UADDR32
