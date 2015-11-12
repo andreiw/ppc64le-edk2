@@ -13,6 +13,7 @@
 #ifndef __PPC64_H__
 #define __PPC64_H__
 
+#ifdef PPC64_ABI_elfv1
 // 48 + 64 parameter save area
 #define STACK_FRAME_MIN 112
 
@@ -31,6 +32,45 @@
 #define STACK_TOC            40
 #define STACK_LR             16
 #define STACK_CR             8
+#endif /* PPC64_ABI_elfv1 */
+
+#ifdef PPC64_ABI_elfv2
+//
+// Power Architecture 64-Bit ELF V2 ABI: The minimum stack frame
+// size shall be 32 bytes. A minimum stack frame consists of the
+// first 4 double-words (back-chain doubleword, CR save word and
+// reserved word, LR save doubleword, and TOC pointer doubleword),
+// with padding to meet the 16-byte alignment requirement.
+//
+#define STACK_FRAME_MIN 32
+//
+// ELF v2 ABI, p46, 2.2.2.4 Protected Zone.
+//
+// The 288 bytes below the stack pointer are available as volatile
+// program storage that is not preserved across function calls.
+// Interrupt handlers and any other functions that might run
+// without an explicit call must take care to preserve a
+// protected zone, also referred to as the red zone, of 512 bytes
+// that consists of:
+// - The 288-byte volatile program storage region that is used
+//   to hold saved registers and local variables.
+// - An additional 224 bytes below the volatile program storage
+//   region that is set aside as a volatile system storage region for
+//   system functions
+//
+// If a function does not call other functions and does not need
+// more stack space than is available in the volatile program
+// storage region (that is, 288 bytes), it does not need to have
+// a stack frame. The 224-byte volatile system storage region is
+// not available to compilers for allocation to saved registers
+// and local variables.
+//
+#define STACK_PROTECTED_ZONE 512
+
+#define STACK_TOC            24
+#define STACK_LR             16
+#define STACK_CR             8
+#endif /* PPC64_ABI_elfv2 */
 
 #ifndef __ASSEMBLY__
 #define __MASK(X) (1UL << (X))

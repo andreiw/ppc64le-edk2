@@ -10,8 +10,21 @@
 // WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
+#ifdef PPC64_ABI_elfv1
 // 48 + 64 parameter save area
 #define STACK_FRAME_MIN 112
+#endif /* PPC64_ABI_elfv1 */
+
+#ifdef PPC64_ABI_elfv2
+//
+// Power Architecture 64-Bit ELF V2 ABI: The minimum stack frame
+// size shall be 32 bytes. A minimum stack frame consists of the
+// first 4 double-words (back-chain doubleword, CR save word and
+// reserved word, LR save doubleword, and TOC pointer doubleword),
+// with padding to meet the 16-byte alignment requirement.
+//
+#define STACK_FRAME_MIN 32
+#endif /* PPC64_ABI_elfv2 */
 
 .text
 

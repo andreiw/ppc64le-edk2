@@ -2167,7 +2167,8 @@ Returns:
       return EFI_ABORTED;
     }
 
-    if (MachineType != EFI_IMAGE_MACHINE_PPC64) {
+    if (MachineType != EFI_IMAGE_MACHINE_PPC64 &&
+        MachineType != EFI_IMAGE_MACHINE_PPC64_V1) {
       return EFI_SUCCESS;
     }
 
@@ -2213,7 +2214,8 @@ Returns:
       return EFI_ABORTED;
     }
 
-    if (MachineType != EFI_IMAGE_MACHINE_PPC64) {
+    if (MachineType != EFI_IMAGE_MACHINE_PPC64 &&
+        MachineType != EFI_IMAGE_MACHINE_PPC64_V1) {
       return EFI_SUCCESS;
     }
 
@@ -2229,7 +2231,8 @@ Returns:
     ((UINT64*)ResetVector)[1] = (UINT64)PeiCorePhysicalAddress;
   }
 
-  if (MachineType != EFI_IMAGE_MACHINE_PPC64) {
+  if (MachineType != EFI_IMAGE_MACHINE_PPC64 &&
+      MachineType != EFI_IMAGE_MACHINE_PPC64_V1) {
     return EFI_SUCCESS;
   }
 
@@ -2341,7 +2344,8 @@ Returns:
       (*MachineType != EFI_IMAGE_MACHINE_EBC) && 
       (*MachineType != EFI_IMAGE_MACHINE_ARMT) &&
       (*MachineType != EFI_IMAGE_MACHINE_AARCH64) &&
-      (*MachineType != EFI_IMAGE_MACHINE_PPC64)) {
+      (*MachineType != EFI_IMAGE_MACHINE_PPC64) &&
+      (*MachineType != EFI_IMAGE_MACHINE_PPC64_V1)) {
     Error (NULL, 0, 3000, "Invalid", "Unrecognized machine type in the PE32 file.");
     return EFI_UNSUPPORTED;
   }

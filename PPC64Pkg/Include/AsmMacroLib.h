@@ -65,8 +65,15 @@
 	oris    r,r, (e)@high;                  \
 	ori     r,r, (e)@l;
 
+#ifdef PPC64_ABI_elfv1
 #define LOAD_ADDR(r, n)                         \
 	ld      r,n@toc(r2)
+#endif /* PPC64_ABI_elfv1 */
+
+#ifdef PPC64_ABI_elfv2
+#define LOAD_ADDR(r, n)                         \
+	ld      r,n@got(r2)
+#endif /* PPC64_ABI_elfv2 */
 
 #define TOC_ANCHOR         \
 	.section .text;    \
@@ -77,6 +84,14 @@ __toc:	.quad __toc_start; \
 	bl	1f;                \
 1:	mflr	reg;               \
 	ld	reg, __toc-1b(reg);
+
+#ifdef PPC64_ABI_elfv1
+#define ABI_NOTE
+#endif
+
+#ifdef PPC64_ABI_elfv2
+#define ABI_NOTE .abiversion 2
+#endif
 
 #endif // __MACRO_IO_LIB_H__
 

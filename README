@@ -78,7 +78,7 @@ $ qemu-system-ppc64 -m 4G -M powernv -nographic -kernel ~/src/edk2/Build/PPC64/D
 You should see skiboot messages, followed by something like:
 
 [1224294270,5] INIT: Starting kernel at 0x20000078, fdt at 0x30350798 (size 0x2d21)
-PPC64LE UEFI firmware (PPC64LE Prototype built at 02:45:10 on Oct 14 2015)
+PPC64LE UEFI firmware (PPC64LE Prototype ABIv2 built at 02:45:10 on Oct 14 2015)
 TB 512000000 Hz
 System RAM @ 0x0 - 0xFFFFFFFF
 Ipl total @ 0x20000000-0x20911000
@@ -277,7 +277,7 @@ CoreInitializeMemoryServices:
   UEFI Interactive Shell v2.1
   EDK II
   UEFI v2.50 (EDK II, 0x00010000)
-  PPC64LE Prototype
+  PPC64LE Prototype ABIv2
   Shell>
 
 Architecture considerations
@@ -287,17 +287,8 @@ TianoCore runs in HV mode and uses the hypervisor decrementer. Future
 work may consider autodetecting and being capable of running in priviledged
 mode only (such as in a VM).
 
-Code is currently built with ABIv1 to avoid --emit-relocs creating a bunch
-of 16-bit TOC relocations that I have no hope of converting to PE32+ base relocs.
-
-It seems that it should be possible to build as PIE (ET_DYN) ABIv2 and convert
-R_PPC64_RELATIVE to base relocs as well, but that will involve a bit more
-changes to GenFw/ElfConvert, as the later deals with section-specific
-".rela.blah" sections, not runtime ".rela" that has no section back-
-reference. In the end I think that's the only agreeable approach
-(who wants to call an ABIv1 EFI runtime service from an ABIv2 OS? not me...),
-but I'd rather make some forward progress without turtling more with the
-build tools.
+Code is built as PIE ABIv2 or PIE ABIv1. The early work was done
+done with non-PIE ABIv1 (it's not possible to build non-PIE ABIv2).
 
 Platform considerations
 =======================

@@ -192,6 +192,10 @@ typedef struct {
 #define EM_ALPHA_STD	41	/* Digital Alpha (standard value). */
 #define EM_ALPHA	0x9026	/* Alpha (written in the absence of an ABI) */
 
+/* e_flags */
+#define EF_PPC64_ABI_V1 1	/* ELFv1 ABI (generally BE, but we use LE). */
+#define EF_PPC64_ABI_V2 2	/* ELFv2 ABI (generally LE). */
+
 /* Special section indexes. */
 #define SHN_UNDEF	     0		/* Undefined, missing, irrelevant. */
 #define SHN_LORESERVE	0xff00		/* First of reserved range. */

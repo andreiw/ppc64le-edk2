@@ -251,8 +251,12 @@ typedef union {
 ///
 /// PE32+ Machine type for PPC64 images.
 ///
-#define EFI_IMAGE_MACHINE_PPC64  0x1f0
-
+#ifdef PPC64_ABI_elfv2
+#define EFI_IMAGE_MACHINE_PPC64     0x1f0
+#endif
+#ifdef PPC64_ABI_elfv1
+#define EFI_IMAGE_MACHINE_PPC64     0
+#endif
 
 #if   defined (MDE_CPU_IA32)
 

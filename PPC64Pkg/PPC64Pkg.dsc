@@ -28,9 +28,16 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   FLASH_DEFINITION               = PPC64Pkg/PPC64Pkg.fdf
   SKUID_IDENTIFIER               = DEFAULT
+  #
+  # You can also build as elfv1, although the artifacts
+  # produced are not interchangeable (and won't mix
+  # on purpose due to different COFF architecture value).
+  #
+  ABI                            = elfv1
 
 [BuildOptions]
   RELEASE_*_*_CC_FLAGS  = -DMDEPKG_NDEBUG
+  *_*_PPC64_ABI_FLAGS   = $(ABI)
 
 [LibraryClasses.common]
   OpalLib|PPC64Pkg/Library/OpalLib/OpalLib.inf
@@ -123,7 +130,11 @@
 
 [PcdsFixedAtBuild.common]
   gPPC64TokenSpaceGuid.PcdSystemMemoryBase|0x0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"PPC64LE Prototype"
+!if $(ABI) == elfv2
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"PPC64LE Prototype ABIv2"
+!else
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"PPC64LE Prototype ABIv1"
+!endif
 
   # Set terminal type to TtyTerm, the value encoded is EFI_TTY_TERM_GUID
   gPPC64TokenSpaceGuid.PcdTerminalTypeGuidBuffer|{0x80, 0x6d, 0x91, 0x7d, 0xb1, 0x5b, 0x8c, 0x45, 0xa4, 0x8f, 0xe2, 0x5f, 0xdd, 0x51, 0xef, 0x94}

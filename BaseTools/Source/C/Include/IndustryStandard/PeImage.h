@@ -41,6 +41,7 @@
 //
 // PE32+ Machine type for EFI images
 //
+#define IMAGE_FILE_MACHINE_UNKNOWN  0x0
 #define IMAGE_FILE_MACHINE_I386     0x014c
 #define IMAGE_FILE_MACHINE_IA64     0x0200
 #define IMAGE_FILE_MACHINE_EBC      0x0EBC
@@ -48,7 +49,8 @@
 #define IMAGE_FILE_MACHINE_ARM      0x01c0  // Thumb only
 #define IMAGE_FILE_MACHINE_ARMT     0x01c2  // 32bit Mixed ARM and Thumb/Thumb 2  Little Endian
 #define IMAGE_FILE_MACHINE_ARM64    0xAA64  // 64bit ARM Architecture, Little Endian
-#define IMAGE_FILE_MACHINE_POWERPC  0x1f0
+#define IMAGE_FILE_MACHINE_POWERPC  0x1f0   // Should we use 0x1f1, that implies FP support? But
+                                            // we don't use any FP facilities today.
 
 //
 // Support old names for backward compatible
@@ -61,6 +63,7 @@
 #define EFI_IMAGE_MACHINE_ARMT      IMAGE_FILE_MACHINE_ARMT
 #define EFI_IMAGE_MACHINE_AARCH64   IMAGE_FILE_MACHINE_ARM64
 #define EFI_IMAGE_MACHINE_PPC64     IMAGE_FILE_MACHINE_POWERPC
+#define EFI_IMAGE_MACHINE_PPC64_V1  IMAGE_FILE_MACHINE_UNKNOWN
 
 #define EFI_IMAGE_DOS_SIGNATURE     0x5A4D      // MZ
 #define EFI_IMAGE_OS2_SIGNATURE     0x454E      // NE

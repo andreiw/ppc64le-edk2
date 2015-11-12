@@ -3936,8 +3936,8 @@ DEFINE GCC49_ARM_ASLDLINK_FLAGS      = DEF(GCC48_ARM_ASLDLINK_FLAGS)
 DEFINE GCC49_AARCH64_ASLDLINK_FLAGS  = DEF(GCC48_AARCH64_ASLDLINK_FLAGS)
 
 DEFINE GCC49_PPC64_ASM_FLAGS         = $(ARCHASM_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ASM_FLAGS) -mlittle-endian -mcmodel=large
-DEFINE GCC49_PPC64_CC_FLAGS          = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -save-temps -fverbose-asm -fsigned-char -mcmodel=large -fomit-frame-pointer  -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -mpowerpc64 -mcpu=power8 -mtune=power8 -mabi=elfv1 -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
-DEFINE GCC49_PPC64_DLINK_FLAGS       = --emit-relocs -nostdlib --gc-sections -u $(IMAGE_ENTRY_POINT) -e $(IMAGE_ENTRY_POINT) -Map $(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x1000
+DEFINE GCC49_PPC64_CC_FLAGS          = -mabi=$(ABI_FLAGS) -DPPC64_ABI_$(ABI_FLAGS) $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -save-temps -fverbose-asm -fsigned-char -mcmodel=large -fomit-frame-pointer  -ffunction-sections -fdata-sections -fno-builtin -Wno-address -fno-asynchronous-unwind-tables -fno-stack-protector -mno-multiple -mno-pointers-to-nested-functions -mno-strict-align -msoft-float -mpowerpc64 -mcpu=power8 -mtune=power8 -g -fshort-wchar -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
+DEFINE GCC49_PPC64_DLINK_FLAGS       = -pie -nostdlib --gc-sections -u $(IMAGE_ENTRY_POINT) -e $(IMAGE_ENTRY_POINT) -Map $(DEST_DIR_DEBUG)/$(BASE_NAME).map -z common-page-size=0x1000
 DEFINE GCC49_PPC64_DLINK2_FLAGS      = DEF(GCC_DLINK2_FLAGS_COMMON) --defsym=PECOFF_HEADER_SIZE=0x228
 DEFINE GCC49_PPC64_ASLDLINK_FLAGS    = DEF(GCC49_PPC64_DLINK_FLAGS) --entry ReferenceAcpiTable -u $(IMAGE_ENTRY_POINT)
 
@@ -4672,7 +4672,7 @@ RELEASE_GCC49_AARCH64_CC_FLAGS   = DEF(GCC49_AARCH64_CC_FLAGS) -Wno-unused-but-s
 *_GCC49_PPC64_DLINK_FLAGS      = DEF(GCC49_PPC64_DLINK_FLAGS)
 *_GCC49_PPC64_DLINK2_FLAGS     = DEF(GCC49_PPC64_DLINK2_FLAGS)
 *_GCC49_PPC64_PLATFORM_FLAGS   =
-*_GCC49_PPC64_PP_FLAGS         = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_PP_FLAGS)
+*_GCC49_PPC64_PP_FLAGS         = -DPPC64_ABI_$(ABI_FLAGS) $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_PP_FLAGS)
 *_GCC49_PPC64_RC_FLAGS         = DEF(GCC_PPC64_RC_FLAGS)
 *_GCC49_PPC64_VFRPP_FLAGS      = $(ARCHCC_FLAGS) $(PLATFORM_FLAGS) DEF(GCC_VFRPP_FLAGS)
 *_GCC49_PPC64_OBJCOPY_FLAGS    =

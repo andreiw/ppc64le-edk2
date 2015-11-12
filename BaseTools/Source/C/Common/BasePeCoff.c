@@ -189,6 +189,7 @@ Returns:
       ImageContext->Machine != EFI_IMAGE_MACHINE_ARMT && \
       ImageContext->Machine != EFI_IMAGE_MACHINE_EBC  && \
       ImageContext->Machine != EFI_IMAGE_MACHINE_PPC64 && \
+      ImageContext->Machine != EFI_IMAGE_MACHINE_PPC64_V1 && \
       ImageContext->Machine != EFI_IMAGE_MACHINE_AARCH64) {
     if (ImageContext->Machine == IMAGE_FILE_MACHINE_ARM) {
       //

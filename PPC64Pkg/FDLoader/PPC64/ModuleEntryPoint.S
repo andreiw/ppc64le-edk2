@@ -16,6 +16,8 @@
 #define FV_OFFSET (FixedPcdGet64(PcdFvBaseAddress) - \
                    FixedPcdGet64(PcdFdBaseAddress))
 
+	ABI_NOTE
+
 ASM_FUNC(_ModuleEntryPoint)
         /*
          * With credit to the Teensy ELF tutorial.
@@ -71,6 +73,8 @@ code:   tdi   0, 0, 0x48; /* Reverse endian of b . + 8          */
 2:      mflr r1
         addi r1, r1, (FV_OFFSET) - (2b - start)
         ld   r1, 0(r1)
-        ld   r1, 0(r1)    /* Remove when we switch to ABIv2 */
+#ifdef PPC64_ABI_elfv1
+        ld   r1, 0(r1)
+#endif /* PPC64_ABI_elfv1 */
         mtlr r1
         blr

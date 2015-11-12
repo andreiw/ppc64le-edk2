@@ -115,6 +115,7 @@ typedef INT64   INTN;
   #define ASM_GLOBAL .globl
 
 #define ASM_LABEL(a) _CONCATENATE(__USER_LABEL_PREFIX__, a)
+#ifdef PPC64_ABI_elfv1
 #define ASM_DOTNAME(a) _CONCATENATE(.,ASM_LABEL(a))
 #define ASM_FUNC(name)                  \
   .section .text;                       \
@@ -129,6 +130,15 @@ ASM_LABEL(name):                        \
   .previous;                            \
   .type ASM_LABEL(name),@function;      \
 ASM_DOTNAME(name):
+#endif /* PPC64_ABI_elfv1 */
+#ifdef PPC64_ABI_elfv2
+#define ASM_FUNC(name)   \
+  .section .text;        \
+  .align 2;              \
+  .type name,@function;  \
+  .globl ASM_LABEL(name);\
+ASM_LABEL(name):
+#endif /* PPC64_ABI_elfv2 */
 #endif
 
 /**

@@ -505,7 +505,12 @@ ScanSections64 (
     NtHdr->Pe32Plus.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC;
     break;
   case EM_PPC64:
-    NtHdr->Pe32Plus.FileHeader.Machine = EFI_IMAGE_MACHINE_PPC64;
+    if (mEhdr->e_flags == EF_PPC64_ABI_V1) {
+      NtHdr->Pe32Plus.FileHeader.Machine = EFI_IMAGE_MACHINE_PPC64_V1;
+    } else {
+      assert (mEhdr->e_flags == EF_PPC64_ABI_V2);
+      NtHdr->Pe32Plus.FileHeader.Machine = EFI_IMAGE_MACHINE_PPC64;
+    }
     NtHdr->Pe32Plus.OptionalHeader.Magic = EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC;
     break;
   default:
@@ -879,9 +884,15 @@ WriteSections64 (
           }
         } else if (mEhdr->e_machine == EM_PPC64) {
           switch (ELF_R_TYPE(Rel->r_info)) {
-          case R_PPC64_RELATIVE:
-          case R_PPC64_ADDR64:
           case R_PPC64_TOC:
+          case R_PPC64_ADDR64:
+            /*
+             * These two types are never seen when compiling as
+             * -pie with either v1 or v2, but it's not possible
+             * to compile as v2 without -pie.
+             */
+            assert (mEhdr->e_flags == EF_PPC64_ABI_V1);
+          case R_PPC64_RELATIVE:
             *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
             break;
 
@@ -1015,9 +1026,15 @@ WriteRelocations64 (
             }
           } else if (mEhdr->e_machine == EM_PPC64) {
             switch (ELF_R_TYPE(Rel->r_info)) {
-            case R_PPC_RELATIVE:
             case R_PPC64_ADDR64:
             case R_PPC64_TOC:
+              /*
+               * These two types are never seen when compiling as
+               * -pie with either v1 or v2, but it's not possible
+               * to compile as v2 without -pie.
+               */
+              assert (mEhdr->e_flags == EF_PPC64_ABI_V1);
+            case R_PPC_RELATIVE:
               CoffAddFixup(
                 (UINT32) ((UINT64) mCoffSectionsOffset[ShInfo]
                 + (Rel->r_offset - SecShdr->sh_addr)),
