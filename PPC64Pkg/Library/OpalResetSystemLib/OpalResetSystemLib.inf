@@ -1,0 +1,42 @@
+#/** @file
+#
+# PowerPC 64-bit LE on PowerNV/OPAL platforms.
+#
+# Copyright (c) 2015, Andrei Warkentin <andrey.warkentin@gmail.com>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OpalResetSystemLib
+  MODULE_UNI_FILE                = OpalResetSystemLib.uni
+  FILE_GUID                      = 667A8B1C-9C97-4b2a-AE7E-568772FE45F3
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = ResetSystemLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = PPC64
+#
+
+[Sources]
+  OpalResetSystemLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  PPC64Pkg/PPC64Pkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  OpalLib

@@ -30,14 +30,8 @@ typedef INTN OPAL_STATUS;
 #define OPAL_BUSY_EVENT         -12
 #define OPAL_HARDWARE_FROZEN    -13
 
-#define OPAL_CONSOLE_WRITE       1
-#define OPAL_CONSOLE_READ        2
 #define OPAL_TERMINAL_0          0
-
-#define OPAL_POLL_EVENTS         10
 #define OPAL_EVENT_CONSOLE_INPUT 0x10
-
-#define OPAL_REINIT_CPUS         70
 #define OPAL_REINIT_CPUS_HILE_LE (1 << 1)
 
 OPAL_STATUS
@@ -62,6 +56,16 @@ OpalReinitCPUs (
 OPAL_STATUS
 OpalPollEvents (
 	IN EFI_PHYSICAL_ADDRESS OutEventMask
+	);
+
+OPAL_STATUS
+OpalReboot (
+	VOID
+	);
+
+OPAL_STATUS
+OpalPowerDown (
+	VOID
 	);
 
 #endif // __OPAL_LIB_H__

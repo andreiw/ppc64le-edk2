@@ -106,7 +106,7 @@
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  ResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf
+  ResetSystemLib|PPC64Pkg/Library/OpalResetSystemLib/OpalResetSystemLib.inf
   RealTimeClockLib|PPC64Pkg/Library/OpalRealTimeClockLib/OpalRealTimeClockLib.inf
 
 [LibraryClasses.common.DXE_CORE]

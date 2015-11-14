@@ -15,29 +15,12 @@
 #include <Chipset/PPC64.h>
 #include <Pcr.h>
 
-#define OPAL_SUCCESS            0
-#define OPAL_PARAMETER          -1
-#define OPAL_BUSY               -2
-#define OPAL_PARTIAL            -3
-#define OPAL_CONSTRAINED        -4
-#define OPAL_CLOSED             -5
-#define OPAL_HARDWARE           -6
-#define OPAL_UNSUPPORTED        -7
-#define OPAL_PERMISSION         -8
-#define OPAL_NO_MEM             -9
-#define OPAL_RESOURCE           -10
-#define OPAL_INTERNAL_ERROR     -11
-#define OPAL_BUSY_EVENT         -12
-#define OPAL_HARDWARE_FROZEN    -13
-
 #define OPAL_CONSOLE_WRITE       1
 #define OPAL_CONSOLE_READ        2
-#define OPAL_TERMINAL_0          0
-
+#define OPAL_CEC_POWER_DOWN      5
+#define OPAL_CEC_REBOOT          6
 #define OPAL_POLL_EVENTS         10
-
 #define OPAL_REINIT_CPUS         70
-#define OPAL_REINIT_CPUS_HILE_LE (1 << 1)
 
 /*
  * Perform a call to the OpenPower Abstraction Layer
@@ -111,3 +94,5 @@ OPAL_CALL(OpalConsoleWrite, OPAL_CONSOLE_WRITE)
 OPAL_CALL(OpalConsoleRead, OPAL_CONSOLE_READ)
 OPAL_CALL(OpalReinitCPUs, OPAL_REINIT_CPUS)
 OPAL_CALL(OpalPollEvents, OPAL_POLL_EVENTS)
+OPAL_CALL(OpalReboot, OPAL_CEC_REBOOT)
+OPAL_CALL(OpalPowerDown, OPAL_CEC_POWER_DOWN)
