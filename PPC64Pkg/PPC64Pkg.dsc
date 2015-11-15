@@ -33,7 +33,7 @@
   # produced are not interchangeable (and won't mix
   # on purpose due to different COFF architecture value).
   #
-  ABI                            = elfv1
+  ABI                            = elfv2
 
 [BuildOptions]
   RELEASE_*_*_CC_FLAGS  = -DMDEPKG_NDEBUG
@@ -179,7 +179,7 @@
 
 [Components.common]
   #
-  # The blob used to make the FD loadable by skiboot automagically, eventually.
+  # The blob used to make the FD loadable by skiboot automagically.
   #
   PPC64Pkg/FDLoader/FDLoader.inf
 
