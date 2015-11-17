@@ -141,6 +141,12 @@ BuildMemoryHobs (
 {
 	UINTN Index;
 	UINTN NumResv;
+	INT32 Node;
+	INT32 PropertyLen;
+	UINT64 InitrdStart;
+	UINT64 InitrdEnd;
+	const struct fdt_property *Property;
+
 	EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttributes;
 
 	ResourceAttributes = (
@@ -174,6 +180,51 @@ BuildMemoryHobs (
 		       Addr, Addr + Size));
 		BuildMemoryAllocationHob (Addr,Size,
 					  EfiRuntimeServicesData);
+	}
+
+	Node = fdt_path_offset (FDT, "/chosen");
+	ASSERT(Node >= 0);
+	if (Node < 0) {
+		DEBUG ((EFI_D_ERROR, "/chosen not found?\n"));
+		return;
+	}
+
+	Property = fdt_get_property (FDT, Node,
+				     "linux,initrd-start",
+				     &PropertyLen);
+	if (Property == NULL ||
+	    PropertyLen < sizeof(UINT32) ||
+	    PropertyLen > sizeof(UINT64)) {
+		DEBUG ((EFI_D_ERROR, "no or wrong linux,initrd-start"));
+		return;
+	}
+
+	if (PropertyLen == sizeof(UINT32)) {
+		InitrdStart = fdt32_to_cpu (*(UINT32 *) Property->data);
+	} else {
+		InitrdStart = fdt64_to_cpu (*(UINT64 *) Property->data);
+	}
+
+	Property = fdt_get_property (FDT, Node,
+				     "linux,initrd-end",
+				     &PropertyLen);
+	if (Property == NULL ||
+	    PropertyLen < sizeof(UINT32) ||
+	    PropertyLen > sizeof(UINT64)) {
+		DEBUG ((EFI_D_ERROR, "no or wrong linux,initrd-end"));
+		return;
+	}
+
+	if (PropertyLen == sizeof(UINT32)) {
+		InitrdEnd = fdt32_to_cpu (*(UINT32 *) Property->data);
+	} else {
+		InitrdEnd = fdt64_to_cpu (*(UINT64 *) Property->data);
+	}
+
+	if (InitrdEnd - InitrdStart > 0) {
+		BuildMemoryAllocationHob (InitrdStart,
+					  InitrdEnd - InitrdStart,
+					  EfiBootServicesData);
 	}
 }
 
