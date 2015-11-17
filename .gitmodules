@@ -1,0 +1,3 @@
+[submodule "FatUpstreamPkg"]
+	path = edk2-FatPkg
+	url = git://github.com/tianocore/edk2-FatPkg

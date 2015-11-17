@@ -120,6 +120,20 @@ READ_LOCK_STATUS   = TRUE
   INF EmbeddedPkg/SerialDxe/SerialDxe.inf
 
   #
+  # Drivers.
+  #
+  INF PPC64Pkg/Drivers/FdtBusDxe/FdtBusDxe.inf
+  INF UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
+  INF OvmfPkg/BlockMmioToBlockIoDxe/BlockIo.inf
+
+  #
+  # FAT filesystem + GPT/MBR partitioning
+  #
+  INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  INF edk2-FatPkg/EnhancedFatDxe/Fat.inf
+
+  #
   # Bds
   #
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf

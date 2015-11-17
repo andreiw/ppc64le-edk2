@@ -219,6 +219,20 @@
   EmbeddedPkg/SerialDxe/SerialDxe.inf
 
   #
+  # Drivers.
+  #
+  PPC64Pkg/Drivers/FdtBusDxe/FdtBusDxe.inf
+  UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
+  OvmfPkg/BlockMmioToBlockIoDxe/BlockIo.inf
+
+  #
+  # FAT filesystem + GPT/MBR partitioning
+  #
+  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  edk2-FatPkg/EnhancedFatDxe/Fat.inf
+
+  #
   # Bds
   #
   MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf

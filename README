@@ -75,6 +75,8 @@ https://www.flamingspork.com/blog/2015/08/28/running-opal-in-qemu-the-powernv-pl
 After that, assuming skiboot.lid is in current working directory,
 $ qemu-system-ppc64 -m 4G -M powernv -nographic -kernel ~/src/edk2/Build/PPC64/DEBUG_GCC49/FV/POWERNV.fd
 
+You may provide a FAT filesystem image via -initrd to be accessible from UEFI.
+
 You should see skiboot messages, followed by something like:
 
 [1224294270,5] INIT: Starting kernel at 0x20000078, fdt at 0x30350798 (size 0x2d21)

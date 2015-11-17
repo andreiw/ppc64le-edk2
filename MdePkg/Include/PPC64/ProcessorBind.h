@@ -96,6 +96,12 @@ typedef INT64   INTN;
 #define MAX_ADDRESS  0xFFFFFFFFFFFFFFFF
 
 ///
+/// Maximum legal AArch64 INTN and UINTN values.
+///
+#define MAX_INTN   ((INTN)0x7FFFFFFFFFFFFFFFULL)
+#define MAX_UINTN  ((UINTN)0xFFFFFFFFFFFFFFFFULL)
+
+///
 /// The stack alignment required for PPC64
 ///
 #define CPU_STACK_ALIGNMENT  16

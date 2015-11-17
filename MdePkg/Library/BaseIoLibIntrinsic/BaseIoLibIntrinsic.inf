@@ -58,6 +58,9 @@
 [Sources.AARCH64]
   IoLibArm.c
 
+[Sources.PPC64]
+  IoLibPPC64.c
+
 [Packages]
   MdePkg/MdePkg.dec
 
