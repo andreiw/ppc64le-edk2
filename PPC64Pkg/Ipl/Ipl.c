@@ -79,6 +79,8 @@ ParseFDT (
 	INT32        Node, Prev;
 	UINT64       NewBase;
 	UINT64       NewSize;
+	UINT64       MemBase;
+	UINT64       MemSize;
 	CONST CHAR8  *Type;
 	INT32        Len;
 	CONST UINT64 *RegProp;
@@ -86,6 +88,8 @@ ParseFDT (
 
 	NewBase = 0;
 	NewSize = 0;
+	MemBase = 0;
+	MemSize = 0;
 
 	ASSERT (fdt_check_header (DeviceTreeBase) == 0);
 
@@ -113,15 +117,17 @@ ParseFDT (
 				NewSize = fdt64_to_cpu (ReadUnaligned64 (RegProp + 1));
 
 				//
-				// Make sure the start of DRAM matches our expectation
+				// We expect the memory nodes to be sorted. I
+				// hope that's a normal assumption to make :(.
 				//
-				ASSERT (FixedPcdGet64 (PcdSystemMemoryBase) == NewBase);
-				PatchPcdSet64 (PcdSystemMemorySize, NewSize);
+				// This also assumes that no discontinuities occur.
+				//
+				ASSERT (NewBase == MemBase + MemSize);
+				MemSize += NewSize;
 			} else {
 				DEBUG ((EFI_D_ERROR, "%a: Failed to parse FDT memory node\n",
 					__FUNCTION__));
 			}
-			break;
 		} else if (Type && AsciiStrnCmp (Type, "cpu", Len) == 0) {
 			RegProp32 = fdt_getprop (DeviceTreeBase, Node,
 						 "timebase-frequency", NULL);
@@ -129,6 +135,9 @@ ParseFDT (
 			DEBUG ((EFI_D_INFO, "TB %lu Hz\n", PcrGet()->TBFreq));
 		}
 	}
+
+	ASSERT (FixedPcdGet64 (PcdSystemMemoryBase) == MemBase);
+	PatchPcdSet64 (PcdSystemMemorySize, MemSize);
 }
 
 

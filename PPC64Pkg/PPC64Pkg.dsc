@@ -219,6 +219,11 @@
   EmbeddedPkg/SerialDxe/SerialDxe.inf
 
   #
+  # GDB debugger support.
+  #
+  DebugPkg/GdbSyms/GdbSyms.inf
+
+  #
   # Drivers.
   #
   PPC64Pkg/Drivers/FdtBusDxe/FdtBusDxe.inf
