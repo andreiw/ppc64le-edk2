@@ -102,6 +102,19 @@ FdtBusDxeEntryPoint (
     return EFI_NOT_FOUND;
   }
 
+  //
+  // Install the FDT into the Configuration Table
+  //
+  Status = gBS->InstallConfigurationTable (
+                  &gFdtTableGuid,
+                  DeviceTreeBase
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR, "couldn't install DTB into configuration table: %r\n",
+            Status));
+    return Status;
+  }
+
   Node = fdt_path_offset (DeviceTreeBase, "/chosen");
   if (Node < 0) {
     DEBUG ((EFI_D_ERROR, "/chosen not found?\n"));
@@ -155,7 +168,7 @@ FdtBusDxeEntryPoint (
   BlockMmio->Media->RemovableMedia = FALSE;
   BlockMmio->Media->MediaPresent = TRUE;
   BlockMmio->Media->LogicalPartition = FALSE;
-  BlockMmio->Media->ReadOnly = TRUE;
+  BlockMmio->Media->ReadOnly = FALSE;
   BlockMmio->Media->WriteCaching = FALSE;
   BlockMmio->Media->BlockSize = 512;
   BlockMmio->Media->IoAlign = 0;
